@@ -91,7 +91,7 @@ pip install pycocotools
 
 or you can refer to the `requirements.txt`
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 GPU is optional but recommended.
@@ -128,6 +128,14 @@ data/
 ```
 
 ---
+## Quickstart (reproduce main results)
+
+### 0) Setup
+```bash
+conda create -n clip_failure python=3.9
+conda activate clip_failure
+pip install -r requirements.txt
+```
 
 ## Step 1: Run Baseline Retrieval
 
@@ -196,6 +204,8 @@ Each image shows:
 
 ### How to Annotate
 
+See: `annotations_guide_en.md` (or `annotations_guide_cn.md`).
+
 1. Open your assigned CSV (e.g., `assign_A.csv`)
 2. For each row:
 
@@ -221,7 +231,7 @@ Attribute
 Action
 Count
 Context
-Sptial
+Spatial
 Object
 ```
 
@@ -249,23 +259,32 @@ Ambiguous
 
 After annotation:
 
-* Merge CSVs
+* Merge CSVs: run `merge_assignments.py`
+  
 * Compute:
 
   * Category distribution
   * Ambiguous vs clear failure ratio
   * Inter-annotator agreement (overlap set)
 
+## Step 5: Summarize results (tables/plots-ready CSV)
+```bash
+python summarize_result.py
+```
 Typical findings:
 
 * A large fraction of failures are **Ambiguous**
-* Clear failures cluster around **attribute binding** and **object presence**
+* Clear failures cluster around **Attribute** and **Object**
 
 ---
 
-## Step 5: Failure-Driven Improvements (Optional)
+## Step 6: Failure-Driven Improvements (Optional)
 
 This repository supports **lightweight improvements without training**:
+
+```bash
+python improve_subset.py
+```
 
 ### Examples
 
@@ -286,6 +305,55 @@ Evaluation should be:
 * Embedding order is frozen via `meta_*.json`
 * Cached embeddings ensure consistent results
 * CSV indices map directly to embedding rows
+
+---
+
+## Outputs
+
+After running the pipeline, you should see:
+
+- `cache/`
+
+   - image/text embeddings + `meta_*.json` (frozen order)
+
+- `failure_analysis/`
+
+   - `assign_overlap.csv`, `assign_A.csv`, ...
+
+   - `vis_overlap/`, `vis_A/`, ...
+
+- `final_results/` (or your actual folder)
+
+   - `summary_subset_results.csv` (used for report plots)
+
+Note: delete cache/ only if you want to recompute embeddings.
+
+---
+## Key configs (defaults)
+
+`seed`: controls the sampled subset + any random splits
+
+`subset_size`: number of failure cases per category
+
+`pooling`: {mean, max, logsumexp} for template aggregation
+
+`K_templates`: number of prompt templates
+
+`tau`: temperature for logsumexp (if used)
+
+(Where these are set: main.py / improve_subset.py)
+
+---
+
+## Failure taxonomy labels
+
+Main label (category) must be one of:
+
+- Ambiguous, Attribute, Action, Count, Context, Spatial, Object
+
+If `category=Ambiguous`, optionally fill:
+
+ambiguous_subtype in {underspecified, nearduplicate}
 
 ---
 
