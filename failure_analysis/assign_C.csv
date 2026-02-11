@@ -1,0 +1,51 @@
+idx,caption,gt_img_idx,pred_img_idx,category,ambiguous_subtype
+354,A fireplace and dining table in a dining room.,70,3785,Object,
+968,The man is riding the waves on the water on his board. ,193,1075,Ambiguous,nearduplicate
+1470,A sign on the side of a busy street outside a shopping center,294,3940,Attribute,
+2759,A statue of two people flying a kite. ,551,4279,Count,
+2795,A snow skier is standing on the snow.,559,2290,Count,
+3023,Two women standing next to each other with one holding video game controllers.,604,3691,Ambiguous,underspecified
+3171,A large bus on a open city street.,634,4448,Ambiguous,underspecified
+3253,A crowd of people flying kites in a blue cloudy sky.,650,4279,Ambiguous,underspecified
+3327,A man who is holding a wine glass.,665,2292,Count,
+3340,A woman in gear skiing down a snowy slope,668,1269,Ambiguous,underspecified
+3682,Woman taking her picture in a mirror with her cell phone.,736,2838,Object,
+3995,This is a close up photo of a street sign of a cross street.,799,3097,Ambiguous,nearduplicate
+5219,a brown cow is standing under a green tree,1043,942,Ambiguous,underspecified
+5642,THERE ARE PEOPLE THAT ARE ON THE SNOW SLOPE SKIING,1128,2285,Ambiguous,underspecified
+5893,A baseball game where the batter is waiting for the pitch.,1178,2412,Ambiguous,nearduplicate
+6013,A plane pulled up to a gate with the jet bridge out. ,1202,4961,Ambiguous,underspecified
+6203,A room that has an open refrigerator in it.,1240,4593,Attribute,
+7650,Man sitting at a picnic table using a laptop shaded by an umbrella.,1530,439,Object,
+9297,A white plate of food on a table.,1859,2831,Attribute,
+9801,We are looking up at an old clock tower.,1960,2662,Ambiguous,underspecified
+9932,Someone is holding a pick cellular flip phone. ,1986,3853,Attribute,
+10215,A white dog laying next to a cat on a bed.,2043,4121,Object,
+10394,Modern bathroom with stone sink area and tiled walls.,2078,246,Ambiguous,underspecified
+10610,A cat resting on a laptop next to a person.,2122,4853,Ambiguous,underspecified
+10669,a couple of people that are skiing posing for pictures,2133,807,Ambiguous,nearduplicate
+10997,A bird that is standing on a rock in the water.,2199,1362,Action,
+11090,A tray filled with croissants with hotdogs in the middle,2218,664,Object,
+11161,Two large elephants together with a baby elephant close by.,2232,3554,Count,
+11263,A blue semi truck drives down the street.,2252,538,Ambiguous,underspecified
+11514,"A man in a park, flies his kite with a long tail.",2302,4279,Count,
+12377,a tennis player on a court with a racket,2475,727,Ambiguous,nearduplicate
+12981,Pit bull playing with soccer ball in the grass.,2596,1041,Object,
+14304,The mans wrist watch is laying on the table.,2860,2310,Object,
+14513,A woman standing up brushing her teeth with a toothbrush.,2902,4127,Ambiguous,nearduplicate
+15418,The young man is surfing in the water,3083,544,Action,
+15791,AN ADULT BEAR IS STANDING IN THE FIELD ,3158,1702,Action,
+16953,a cat sits down in front of a laptop ,3390,2122,Ambiguous,nearduplicate
+17429,a man and woman play with a small child ,3485,2209,Object,
+18701,A couple of zebras in a dirt field.,3740,2722,Context,
+19935,Closeup of a decorative gold and grey clock.,3987,2040,Ambiguous,underspecified
+20633,A black cat sitting inside a bathroom sink,4126,2643,Ambiguous,underspecified
+21265,A bus driving in a city area with traffic signs.,4253,1832,Attribute,
+22280,The pedestrian is walking down the side of the highway by the bus.,4456,3884,Object,
+22291,An elephant playing with a sack handing from a concrete structure.,4458,550,Action,
+22393,white cabinets silver oven sink and  refrigerator ,4478,4393,Object,
+22900,An elaborate church with tiled floors and stained glass.,4580,4347,Ambiguous,nearduplicate
+22936,A young woman sits near three suitcases of luggage.,4587,1273,Action,
+24218,A man in skis passing an orange flag on a snowy race course.,4843,4373,Count,
+24367,A wheelbarrow sitting in a field next to a surfboard.,4873,2904,Object,
+24877,A large clock tower sitting in the middle of a paved walkway.,4975,3352,Ambiguous,underspecified

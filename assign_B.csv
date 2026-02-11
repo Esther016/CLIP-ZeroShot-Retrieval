@@ -1,0 +1,51 @@
+idx,caption,gt_img_idx,pred_img_idx,category,ambiguous_subtype
+28,A photo of a table at a nice restaurant with glasses of wine.,5,2582,Ambiguous,missing_info
+186,A man riding on the back of a tusked elephant by a muddy river,37,1657,Count,
+543,three types of microwaves on top of each other.,108,1421,Count,
+890,A kitchen filled with appliances and wooden cabinets.,178,1188,Ambiguous,near_duplicate
+2209,A street light on a street corner with cars driving on it. ,441,3177,Object,
+2992,A bowl holds soup with broccoli and other vegetables. ,598,1444,Object,
+4246,A black and brown large dog sits on an upholstered chair.,849,3310,Object,
+4955,a man on skis stands on a snowy hill side ,991,3165,Context,
+5105,A teddy bear and a stuffed monkey sit side by side.,1021,1547,Object,
+5195,A group of young people playing a game of soccer.,1039,176,Object,
+5365,A stop sign has been placed upside-down in the grass beside a building. ,1073,2468,Action,
+6503,A zebra standing in a grassy area with a building far behind it.,1300,1713,Context,
+6555,The man is sitting next to his bed on the laptop. ,1311,4231,Context,
+6691,A bike parked on the side walk and a car on the street,1338,3921,Object,
+7126,There are women that are talking on the cell phone ,1425,4803,Count,
+7359,A man performs a trick on a skateboard over a rail.,1471,2931,Context,
+7431,a dog is jumping in the air toward a disk,1486,1041,Attribute,missing_info
+7505,A picture of a white toilet in the rest room. ,1501,282,Object,
+8292,many horses walking on a path near a river,1658,855,Action,
+9193,Two people in shorts are playing with tennis rackets on a grassy field.,1838,2805,Ambiguous,other
+10163,A small red sign that says whoa in a stop sign shape.,2032,4408,Attribute,
+11432,A few soccer players are having a confrontation,2286,1149,Action,
+11680,a bird that is flying high over the sky,2336,2609,Ambiguous,near_duplicate
+12255,A group of people walking through a field under the sun.,2451,3874,object,
+12302,There are two yellow flowers inside a vase.,2460,2820,Count,
+12369,Two people sitting at a table with a pizza pie.,2473,270,Object,
+12456,A hot dog with a bunch of toppings and a fork sticking out of it,2491,2368,Object,
+13671,A white and gray cat sitting on a wooden bench,2734,524,Attribute,
+13898,A man is looking through the handle of some scissors.,2779,53,Object,
+15096,A dog jumping through the air into a pool.,3019,1486,Ambiguous,missing_info
+15875, A cut in half sandwich sitting inside of a microwave.,3175,4074,Object,
+16906,A double decker bus parked near a curb by trees. ,3381,2291,Attribute,
+17449,A black and white cat rests on a couch on top of a remote control.,3489,2115,Action,
+17822,A small plane with the cockpit open and landing gear down,3564,2474,Attribute,
+17992,A couple of men standing next to each other on a  tennis court.,3598,81,Context,
+18523,A man riding skis while holding two ski poles.,3704,4252,Ambiguous,near_duplicate
+18723,a person swinging a tennis racket on a tennis court.,3744,2835,Ambiguous,near_duplicate
+19884,Three stuffed animals are dressed and sitting on a blanket in front of empty plates.,3976,1150,Context,
+20166,"A computer desk with a laptop, desktop monitors and a television.",4033,4835,Object,
+20485,Ornate wedding cake ready at the hotel reception,4097,889,Context,
+21360,Many kites can be seen in the air through umbrellas.,4272,2593,Context,
+21614,a number of people in a room with a person playing nintendo wii,4322,1875,Count,
+22055,A LITTLE ROOM AND DINING ROOM AREA WITH FURNITURE,4411,1195,Ambiguous,missing_info
+23065,A bus on the street next to the lamp post.  ,4613,583,Object,
+23305,A man standing on a tennis court holding a tennis racquet.,4661,1577,Object,
+23633,Street vendor selling produce in a street display.,4726,3464,Ambiguous,missing_info
+23948,Poplewalk on the sidewalk near the colorfully striped building.,4789,771,Ambiguous,"missing_info	"
+24031,A vase sitting next to a mirror filled with flowers,4806,1121,Object,
+24940,Two people cross country skiing on a snow covered hill.,4988,1675,Object,
+24987,An umpire is in jump action while the pitcher launches the ball.,4997,737,Ambiguous,near_duplicate
