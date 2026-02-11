@@ -35,6 +35,28 @@ Rather than only reporting retrieval accuracy, we:
 4. Analyze which failure types dominate
 5. Explore targeted improvements on specific failure subsets
 
+**Workflow**
+```mermaid
+flowchart TD
+  A["MS-COCO 2017 val<br/>images + captions_val2017.json"] --> 
+  B["main.py<br/>Sample N=5000 pairs<br/>Encode with CLIP ViT-B/32"]
+
+  B --> C["cache/<br/>image embeddings (pt)<br/>text embeddings (pt)<br/>meta json (frozen ordering)"]
+  C --> D["Baseline eval<br/>Recall@K: R@1 / R@5 / R@10"]
+
+  C --> E["failure.py<br/>Find Top-1 failures<br/>Sample M=200 failures"]
+  E --> F["failure_analysis/<br/>assign_A.csv, assign_B.csv, assign_C.csv<br/>assign_overlap.csv"]
+  E --> G["visualizations/<br/>vis_A, vis_B, vis_C, vis_overlap<br/>(GT vs Retrieved)"]
+
+  F --> H["Human annotation<br/>taxonomy labels<br/>Ambiguous / Attribute / Action / Count / Context / Spatial / Object"]
+  H --> I["merge_assignments.py<br/>Merge CSVs<br/>Compute overlap agreement"]
+  I --> J["summarize_result.py<br/>summary_subset_results.csv<br/>plots-ready tables"]
+
+  J --> K["improve_subset.py (optional)<br/>subset-based prompting / reranking<br/>pooling: mean | max | logsumexp<br/>K_templates, tau"]
+  K --> L["Compare baseline vs improved<br/>Delta Recall@K on clear-failure subsets"]
+
+```
+
 ---
 
 ## Repository Structure
