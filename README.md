@@ -74,7 +74,7 @@ flowchart TD
 │   └── meta_5000_*.json
 │
 ├── failure_analysis/
-│   ├── assign_overlap.csv      # Shared annotation set
+│   ├── assign_overlap.csv       # Shared annotation set
 │   ├── assign_A.csv             # Annotator A tasks
 │   ├── assign_B.csv             # Annotator B tasks
 │   ├── assign_C.csv             # Annotator C tasks
@@ -82,6 +82,9 @@ flowchart TD
 │   ├── vis_A/
 │   ├── vis_B/
 │   └── vis_C/
+│
+├── guidance/
+│   ├── annotation_guide_en.md  # Failure taxonomy definitions
 │
 ├── main.py                     # Baseline retrieval + embedding cache
 ├── failure.py                  # Failure extraction & annotation packaging
