@@ -187,6 +187,9 @@ def main():
                         help="How to pool similarities across templates (default: max)")
     parser.add_argument("--tau", type=float, default=1.0,
                         help="Temperature for logsumexp pooling (only used if --pooling logsumexp)")
+    parser.add_argument("--save_hits_csv", action="store_true",
+                    help="If set, save per-sample hit@K (baseline vs improved) for bootstrapping.")
+
 
     args = parser.parse_args()
 
@@ -322,6 +325,39 @@ def main():
     print(f"R@1  = {r1_i*100:.2f}%   (Δ = {(r1_i-r1_b)*100:.2f}%)")
     print(f"R@5  = {r5_i*100:.2f}%   (Δ = {(r5_i-r5_b)*100:.2f}%)")
     print(f"R@10 = {r10_i*100:.2f}%  (Δ = {(r10_i-r10_b)*100:.2f}%)")
+
+    # --- per-sample hits (for bootstrapping) ---
+    baseline_sub = sim_baseline[subset_indices]  # [n_sub, N_img]
+    base_ranks = torch.argsort(baseline_sub, dim=1, descending=True)
+
+    def hit_at_k(ranks_mat, gt_vec, k):
+        return (ranks_mat[:, :k] == gt_vec.unsqueeze(1)).any(dim=1).to(torch.int32).cpu().numpy()
+
+    base_hit1 = hit_at_k(base_ranks, gt, 1)
+    base_hit5 = hit_at_k(base_ranks, gt, 5)
+    base_hit10 = hit_at_k(base_ranks, gt, 10)
+
+    imp_hit1 = hit_at_k(ranks, gt, 1)
+    imp_hit5 = hit_at_k(ranks, gt, 5)
+    imp_hit10 = hit_at_k(ranks, gt, 10)
+
+    if args.save_hits_csv:
+        import numpy as np
+        cats_tag = "-".join(use_cats) if use_cats else "ALL"
+        out_hits = f"subset_hits_{cats_tag}_n{len(subset_indices)}_{args.pooling}_seed{args.seed}.csv"
+        hits_df = pd.DataFrame({
+            "idx": subset_indices,
+            "gt_img_index": gt.cpu().numpy(),
+            "baseline_hit@1": base_hit1,
+            "baseline_hit@5": base_hit5,
+            "baseline_hit@10": base_hit10,
+            "improved_hit@1": imp_hit1,
+            "improved_hit@5": imp_hit5,
+            "improved_hit@10": imp_hit10,
+        })
+        hits_df.to_csv(out_hits, index=False, encoding="utf-8-sig")
+        print(f"[OK] Saved per-sample hits -> {out_hits}")
+
 
     out = {
         "subset_size": len(subset_indices),
