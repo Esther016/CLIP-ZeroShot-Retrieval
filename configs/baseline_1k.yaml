@@ -1,0 +1,22 @@
+# Experiment configuration for baseline with 1k images
+experiment_name: "baseline_1k"
+device: "cuda"
+
+# Model configuration
+model:
+  name: "openai/clip-vit-base-patch32"
+  batch_size_img: 16  # Adapted for 4GB VRAM
+  batch_size_txt: 32
+
+# Data configuration
+data:
+  num_images: 1000
+  captions_per_image: 5
+  seed: 42
+  img_dir: "./data/coco/val2017"
+  ann_path: "./data/coco/annotations/captions_val2017.json"
+
+# Output configuration
+output:
+  cache_dir: "./cache"
+  results_dir: "./results"

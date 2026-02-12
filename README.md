@@ -1,7 +1,7 @@
 # CLIP-ZeroShot-Retrieval
 
 
-This repository provides a **fully reproducible pipeline** for analyzing **failure modes of a pre-trained vision–language model (CLIP)** on image–text retrieval using the MS-COCO dataset.
+This repository provides a **reproducible pipeline (for core metrics and result tables)** for analyzing **failure modes of a pre-trained vision–language model (CLIP)** on image–text retrieval using the MS-COCO dataset.
 
 The project focuses on:
 
@@ -35,62 +35,33 @@ Rather than only reporting retrieval accuracy, we:
 4. Analyze which failure types dominate
 5. Explore targeted improvements on specific failure subsets
 
-**Workflow**
-```mermaid
-flowchart TD
-  A["MS-COCO 2017 val<br/>images + captions_val2017.json"] --> 
-  B["main.py<br/>Sample N=5000 pairs<br/>Encode with CLIP ViT-B/32"]
-
-  B --> C["cache/<br/>image embeddings (pt)<br/>text embeddings (pt)<br/>meta json (frozen ordering)"]
-  C --> D["Baseline eval<br/>Recall@K: R@1 / R@5 / R@10"]
-
-  C --> E["failure.py<br/>Find Top-1 failures<br/>Sample M=200 failures"]
-  E --> F["failure_analysis/<br/>assign_A.csv, assign_B.csv, assign_C.csv<br/>assign_overlap.csv"]
-  E --> G["visualizations/<br/>vis_A, vis_B, vis_C, vis_overlap<br/>(GT vs Retrieved)"]
-
-  F --> H["Human annotation<br/>taxonomy labels<br/>Ambiguous / Attribute / Action / Count / Context / Spatial / Object"]
-  H --> I["merge_assignments.py<br/>Merge CSVs<br/>Compute overlap agreement"]
-  I --> J["summarize_result.py<br/>summary_subset_results.csv<br/>plots-ready tables"]
-
-  J --> K["improve_subset.py (optional)<br/>subset-based prompting / reranking<br/>pooling: mean | max | logsumexp<br/>K_templates, tau"]
-  K --> L["Compare baseline vs improved<br/>Delta Recall@K on clear-failure subsets"]
-
-```
-
 ---
 
 ## Repository Structure
 
+### Layout
+
 ```text
 .
-├── data/
-│   ├── val2017/                # COCO validation images
-│   └── annotations/
-│       └── captions_val2017.json
-│
-├── cache/                      # Auto-generated embeddings & metadata
-│   ├── img_5000_*.pt
-│   ├── txt_5000_*.pt
-│   └── meta_5000_*.json
-│
-├── failure_analysis/
-│   ├── assign_overlap.csv       # Shared annotation set
-│   ├── assign_A.csv             # Annotator A tasks
-│   ├── assign_B.csv             # Annotator B tasks
-│   ├── assign_C.csv             # Annotator C tasks
-│   ├── vis_overlap/             # Failure visualization images
-│   ├── vis_A/
-│   ├── vis_B/
-│   └── vis_C/
-│
-├── guidance/
-│   ├── annotation_guide_en.md  # Failure taxonomy definitions
-│
-├── main.py                     # Baseline retrieval + embedding cache
-├── failure.py                  # Failure extraction & annotation packaging
-├── annotation_guide.md         # Failure taxonomy definitions
-├── README.md                   # This file
+├── src/                         # core python scripts
+├── scripts/                     # batch runners
+├── outputs/
+│   ├── cache/                   # embeddings + frozen metadata (generated)
+│   ├── subset_results/          # per-subset experiment json outputs
+│   ├── subset_hits/             # per-sample hit csv outputs
+│   ├── summary/                 # summarized csv outputs
+│   └── figures/                 # generated figures
+├── configs/                     # run configs (e.g., baseline_1k.yaml)
+├── data/                        # COCO images + annotations
+├── docs/                        # guides, definitions, baseline/improvement notes (+ pdf exports)
+├── failure_analysis/            # annotation CSVs, analysis scripts, visualizations 
+├── requirements.txt
+
 ```
+
+### Migration Note
+
+This reorganization has been applied with `proposals/` and `trash file/` left unchanged.
 
 ---
 
@@ -155,6 +126,77 @@ data/
 ---
 ## Quickstart (reproduce main results)
 
+
+
+### A) Fast path (already have `annotations_clean.csv`)
+
+Use this when `failure_analysis/analysis_all/annotations_clean.csv` already exists.
+
+1. Run all improvement experiments + summary + bootstrap CI:
+
+```bat
+scripts\experiment_run.bat
+```
+
+2. Expected outputs:
+
+* `outputs/subset_results/subset_results_*.json`
+* `outputs/subset_hits/subset_hits_*.csv`
+* `outputs/summary/summary_subset_results.csv`
+
+3. Success check:
+
+* Terminal prints `[FINISH] Done`
+* `outputs/summary/summary_subset_results.csv` is generated/updated
+
+### B) Full path (include merge + analysis)
+
+Use this when teammates finished manual labels (`assign_A/B/C/overlap.csv`) and need a full post-annotation pipeline.
+
+1. Run:
+
+```bat
+scripts\post_annotations_run.bat
+```
+
+2. This script will do:
+
+* `src/merge_assignments.py` → merged assignment files
+* `failure_analysis/analyze_annotations.py` → `failure_analysis/analysis_all/annotations_clean.csv`
+* `src/improve_subset.py` (Object+Attribute / Object / Attribute / Action)
+* `src/summarize_result.py` → `outputs/summary/summary_subset_results.csv`
+* `src/bootstrap_ci.py` (if Action hits csv exists)
+
+3. Success check:
+
+* Terminal prints `[FINISH] Done`
+* `failure_analysis/analysis_all/annotations_clean.csv` exists
+* `outputs/summary/summary_subset_results.csv` exists
+
+### C) Optional pre-step (rebuild cache from scratch)
+
+If teammates need to regenerate embeddings/failure samples from raw COCO:
+
+```bash
+python src/main.py
+python src/failure.py
+```
+
+Expected outputs:
+
+* `outputs/cache/img_5000_*.pt`, `txt_5000_*.pt`, `meta_5000_*.json`, `captions_5000_*.json`
+* `failure_analysis/assign_*.csv`, `failure_analysis/vis_*/`
+
+### D) One-page verification checklist
+
+After running A or B, verify:
+
+* `outputs/subset_results/` has JSON files for Action / Attribute / Object / Object-Attribute
+* `outputs/subset_hits/` has Action hit CSVs (`max`, `mean`, `logsumexp`)
+* `outputs/summary/summary_subset_results.csv` contains pooling columns (`max`, `mean`, `logsumexp`)
+* `outputs/figures/` contains report figures (`fig_pooling_*`, `fig_best_*`, optional `fig_bootstrap_*`)
+* Running `python src/summarize_result.py` again finishes without errors
+
 ### 0) Setup
 ```bash
 conda create -n clip_failure python=3.9
@@ -164,7 +206,7 @@ pip install -r requirements.txt
 
 ## Step 1: Run Baseline Retrieval
 
-`main.py` performs:
+`src/main.py` performs:
 
 * Random sampling of 5,000 images
 * Extraction of image & text embeddings
@@ -172,12 +214,12 @@ pip install -r requirements.txt
 * Recall@K evaluation
 
 ```bash
-python main.py
+python src/main.py
 ```
 
 ### Output
 
-* Cached embeddings in `cache/`
+* Cached embeddings in `outputs/cache/`
 * Metadata with frozen ordering (`meta_*.json`)
 * Console output:
 
@@ -193,7 +235,7 @@ R@10 = 0.66
 
 ## Step 2: Extract Retrieval Failures
 
-`failure.py`:
+`src/failure.py`:
 
 * Identifies Top-1 failures
 * Samples 200 failures
@@ -201,7 +243,7 @@ R@10 = 0.66
 * Saves visualizations (GT vs Retrieved)
 
 ```bash
-python failure.py
+python src/failure.py
 ```
 
 ### Output
@@ -229,7 +271,7 @@ Each image shows:
 
 ### How to Annotate
 
-See: `annotations_guide_en.md` (or `annotations_guide_cn.md`).
+See: `docs/annotations_guide_en.md` (or `docs/annotations_guide_cn.md`).
 
 1. Open your assigned CSV (e.g., `assign_A.csv`)
 2. For each row:
@@ -246,7 +288,7 @@ ambiguous_subtype   (only if category = Ambiguous)
 
 ### Allowed Categories
 
-See `annotation_guide.md` for exact definitions.
+See `docs/annotations_guide_en.md` for exact definitions.
 
 For labelling, to make it easier, we use shorter version:
 
@@ -284,7 +326,7 @@ Ambiguous
 
 After annotation:
 
-* Merge CSVs: run `merge_assignments.py`
+* Merge CSVs: run `python src/merge_assignments.py`
   
 * Compute:
 
@@ -294,7 +336,7 @@ After annotation:
 
 ## Step 5: Summarize results (tables/plots-ready CSV)
 ```bash
-python summarize_result.py
+python src/summarize_result.py
 ```
 Typical findings:
 
@@ -303,12 +345,12 @@ Typical findings:
 
 ---
 
-## Step 6: Failure-Driven Improvements (Optional)
+## Step 6: Failure-Driven Improvements
 
 This repository supports **lightweight improvements without training**:
 
 ```bash
-python improve_subset.py
+python src/improve_subset.py
 ```
 
 ### Examples
@@ -320,7 +362,7 @@ python improve_subset.py
 Evaluation should be:
 
 * **Subset-based** (only on clear failures)
-* Not expected to significantly change overall Recall@K
+
 
 ---
 
@@ -330,6 +372,8 @@ Evaluation should be:
 * Embedding order is frozen via `meta_*.json`
 * Cached embeddings ensure consistent results
 * CSV indices map directly to embedding rows
+* Reproducibility should be judged by `subset_results/*.json`, `subset_hits/*.csv`, and `summary/summary_subset_results.csv`
+* Figure files (`png`/`pdf`) may differ at binary level across environments (e.g., matplotlib/font/backend), while numeric results remain consistent
 
 ---
 
@@ -337,7 +381,7 @@ Evaluation should be:
 
 After running the pipeline, you should see:
 
-- `cache/`
+- `outputs/cache/`
 
    - image/text embeddings + `meta_*.json` (frozen order)
 
@@ -347,11 +391,11 @@ After running the pipeline, you should see:
 
    - `vis_overlap/`, `vis_A/`, ...
 
-- `final_results/` (or your actual folder)
+- `outputs/summary/` (and other outputs folders)
 
    - `summary_subset_results.csv` (used for report plots)
 
-Note: delete cache/ only if you want to recompute embeddings.
+Note: delete `outputs/cache/` only if you want to recompute embeddings.
 
 ---
 ## Key configs (defaults)
@@ -366,7 +410,7 @@ Note: delete cache/ only if you want to recompute embeddings.
 
 `tau`: temperature for logsumexp (if used)
 
-(Where these are set: main.py / improve_subset.py)
+(Where these are set: src/main.py / src/improve_subset.py)
 
 ---
 
