@@ -4,7 +4,18 @@ proposals/
 
 # experiment artifacts
 outputs/
-failure_analysis/
+
+# ignore everything in failure_analysis
+failure_analysis/*
+
+# but allow this folder path
+!failure_analysis/analysis_all/
+
+# allow this specific file
+!failure_analysis/analysis_all/annotations_clean.csv
+
+
+
 cache/
 
 # python

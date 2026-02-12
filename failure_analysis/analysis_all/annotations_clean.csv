@@ -1,0 +1,211 @@
+idx,caption,gt_img_idx,pred_img_idx,category,ambiguous_subtype,__source_file,category_clean,ambiguous_subtype_clean
+1500,A desk with both a laptop computer and a desktop computer.,300,602,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+2052,"A clock tower stands near a road, trees, and houses. ",410,1546,Object,,assign_A.csv,Object,
+2146,Several old boats sitting in an old ship yard.,429,155,Attribute,,assign_A.csv,Attribute,
+2653,a man that is holding some kind of radio ,530,53,Object,,assign_A.csv,Object,
+3117,the bathroom has a mirror and a tiled sink,623,3266,Object,,assign_A.csv,Object,
+3270,a tennis player swings his tennis racket ,654,3203,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+3361,The two teams are kicking a soccer ball.,672,1149,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+3684,A woman holding a smart phone in a room.,736,1427,Ambiguous,nearduplicate,assign_A.csv,Ambiguous,nearduplicate
+3720,An assortment of fruits and vegetable all set together,744,2831,Context,,assign_A.csv,Context,
+4340,A woman holding a tennis racket in her hand,868,1577,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+4502,A close up picture of someone preparing a sandwich.,900,491,Context,,assign_A.csv,Context,
+4701,A smiling man is wearing a hot pink tie.,940,3239,Attribute,,assign_A.csv,Attribute,
+5844,Three Zebra's eating grass as they walk. ,1168,3233,Count,,assign_A.csv,Count,
+7550,A large clock tower is yellow and white.,1510,3352,Attribute,,assign_A.csv,Attribute,
+7577,A hotel suite with a desk sofa and bed,1515,1185,Object,,assign_A.csv,Object,
+7923,A bird that is sitting on a rock near the water.,1584,1362,Object,,assign_A.csv,Object,
+8908,Well decorated bathroom in a small yellow tinted area.,1781,4176,Attribute,,assign_A.csv,Attribute,
+9695,An image of a hotel bathroom that is ugly.,1939,2652,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+9765,People are having fun on a crowded beach.,1953,4808,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+9845,a black and white cat wearing a little purple hat,1969,4014,Object,,assign_A.csv,Object,
+10176,People are eating pizza and drinking soda at a table. ,2035,4151,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+10548,A man pulling a slice of pizza away from a pizza.,2109,3983,Action,,assign_A.csv,Action,
+10616,A large blue bus is driving down a crowded street.,2123,2597,Attribute,,assign_A.csv,Attribute,
+10779,a white vase with yellow tulips against a grey background,2155,2820,Attribute,,assign_A.csv,Attribute,
+11356,A woman is sitting on an old wooden bench.,2271,787,Action,,assign_A.csv,Action,
+12354,A line of motorcycles backed in and parked in a line at the edge of a sidewalk.,2470,2108,Object,,assign_A.csv,Object,
+12462,A man is lifting a dumbbell weight with one hand.,2492,53,Object,,assign_A.csv,Object,
+12501,Passenger train stopped on the track under a bridge.,2500,3652,Action,,assign_A.csv,Action,
+12585,A giraffe standing under a leaf filled tree.,2517,2594,Ambiguous,nearduplicate,assign_A.csv,Ambiguous,nearduplicate
+12947,a motorcycle with a boot on the back wheel,2589,1669,Object,,assign_A.csv,Object,
+13499,an image of clock that is on the wall,2699,1617,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+13651,There is a street sign on a pole on the side of a snowy highway.,2730,4516,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+14658,A photo of a man doing a trick on his skateboard.,2931,3605,Ambiguous,nearduplicate,assign_A.csv,Ambiguous,nearduplicate
+14696,A person riding a snowboard down a snowy slope.,2939,56,Ambiguous,nearduplicate,assign_A.csv,Ambiguous,nearduplicate
+15101,Several motorcycles are parked on the green grass.,3020,3333,Ambiguous,nearduplicate,assign_A.csv,Ambiguous,nearduplicate
+16048,Horses and bikes are traveling down a track.,3209,1601,Context,,assign_A.csv,Context,
+16582,A yellow and white train passing by multiple rows of tracks.,3316,877,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+16766,there are two woman and a man riding on a elephant,3353,2945,Ambiguous,nearduplicate,assign_A.csv,Ambiguous,nearduplicate
+16891,Groups of people seated under shade umbrellas at blue tables and chairs drinking beverages.,3378,1862,Attribute,,assign_A.csv,Attribute,
+17042,A man at a food truck viewing the menu.,3408,1629,Object,,assign_A.csv,Object,
+17295,A group of people playing a game of baseball on a field.,3459,3890,Ambiguous,underspecified,assign_A.csv,Ambiguous,underspecified
+17674,The side of a buss with a sign on it.,3534,4408,Context,,assign_A.csv,Context,
+17719,A patio umbrella pointed inside out over a picnic table.,3543,2579,Attribute,,assign_A.csv,Attribute,
+17741,A woman stands next to a traffic light.,3548,3423,Object,,assign_A.csv,Object,
+17747,A tennis player has their racquet raised in the air.,3549,610,Action,,assign_A.csv,Action,
+18794,People are windsurfing near a beach on a cloudy day.,3758,185,Action,,assign_A.csv,Action,
+21346,A little girl looking at a pizza pie,4269,4576,Action,,assign_A.csv,Action,
+21641,A small bird sitting on a chair by a table.,4328,3738,Object,,assign_A.csv,Object,
+21776,a window with rain drops on it looking at a street light ,4355,2489,Object,,assign_A.csv,Object,
+23556,A dog sits in the front seat of a jeep. ,4711,4160,Object,,assign_A.csv,Object,
+28,A photo of a table at a nice restaurant with glasses of wine.,5,2582,Ambiguous,underspecified,assign_B.csv,Ambiguous,underspecified
+186,A man riding on the back of a tusked elephant by a muddy river,37,1657,Count,,assign_B.csv,Count,
+543,three types of microwaves on top of each other.,108,1421,Count,,assign_B.csv,Count,
+890,A kitchen filled with appliances and wooden cabinets.,178,1188,Ambiguous,nearduplicate,assign_B.csv,Ambiguous,nearduplicate
+2209,A street light on a street corner with cars driving on it. ,441,3177,Object,,assign_B.csv,Object,
+2992,A bowl holds soup with broccoli and other vegetables. ,598,1444,Object,,assign_B.csv,Object,
+4246,A black and brown large dog sits on an upholstered chair.,849,3310,Object,,assign_B.csv,Object,
+4955,a man on skis stands on a snowy hill side ,991,3165,Context,,assign_B.csv,Context,
+5105,A teddy bear and a stuffed monkey sit side by side.,1021,1547,Object,,assign_B.csv,Object,
+5195,A group of young people playing a game of soccer.,1039,176,Object,,assign_B.csv,Object,
+5365,A stop sign has been placed upside-down in the grass beside a building. ,1073,2468,Action,,assign_B.csv,Action,
+6503,A zebra standing in a grassy area with a building far behind it.,1300,1713,Context,,assign_B.csv,Context,
+6555,The man is sitting next to his bed on the laptop. ,1311,4231,Context,,assign_B.csv,Context,
+6691,A bike parked on the side walk and a car on the street,1338,3921,Object,,assign_B.csv,Object,
+7126,There are women that are talking on the cell phone ,1425,4803,Count,,assign_B.csv,Count,
+7359,A man performs a trick on a skateboard over a rail.,1471,2931,Context,,assign_B.csv,Context,
+7431,a dog is jumping in the air toward a disk,1486,1041,Attribute,underspecified,assign_B.csv,Attribute,
+7505,A picture of a white toilet in the rest room. ,1501,282,Object,,assign_B.csv,Object,
+8292,many horses walking on a path near a river,1658,855,Action,,assign_B.csv,Action,
+9193,Two people in shorts are playing with tennis rackets on a grassy field.,1838,2805,Ambiguous,other,assign_B.csv,Ambiguous,other
+10163,A small red sign that says whoa in a stop sign shape.,2032,4408,Attribute,,assign_B.csv,Attribute,
+11432,A few soccer players are having a confrontation,2286,1149,Action,,assign_B.csv,Action,
+11680,a bird that is flying high over the sky,2336,2609,Ambiguous,nearduplicate,assign_B.csv,Ambiguous,nearduplicate
+12255,A group of people walking through a field under the sun.,2451,3874,Object,,assign_B.csv,Object,
+12302,There are two yellow flowers inside a vase.,2460,2820,Count,,assign_B.csv,Count,
+12369,Two people sitting at a table with a pizza pie.,2473,270,Object,,assign_B.csv,Object,
+12456,A hot dog with a bunch of toppings and a fork sticking out of it,2491,2368,Object,,assign_B.csv,Object,
+13671,A white and gray cat sitting on a wooden bench,2734,524,Attribute,,assign_B.csv,Attribute,
+13898,A man is looking through the handle of some scissors.,2779,53,Object,,assign_B.csv,Object,
+15096,A dog jumping through the air into a pool.,3019,1486,Ambiguous,underspecified,assign_B.csv,Ambiguous,underspecified
+15875, A cut in half sandwich sitting inside of a microwave.,3175,4074,Object,,assign_B.csv,Object,
+16906,A double decker bus parked near a curb by trees. ,3381,2291,Attribute,,assign_B.csv,Attribute,
+17449,A black and white cat rests on a couch on top of a remote control.,3489,2115,Action,,assign_B.csv,Action,
+17822,A small plane with the cockpit open and landing gear down,3564,2474,Attribute,,assign_B.csv,Attribute,
+17992,A couple of men standing next to each other on a  tennis court.,3598,81,Context,,assign_B.csv,Context,
+18523,A man riding skis while holding two ski poles.,3704,4252,Ambiguous,nearduplicate,assign_B.csv,Ambiguous,nearduplicate
+18723,a person swinging a tennis racket on a tennis court.,3744,2835,Ambiguous,nearduplicate,assign_B.csv,Ambiguous,nearduplicate
+19884,Three stuffed animals are dressed and sitting on a blanket in front of empty plates.,3976,1150,Context,,assign_B.csv,Context,
+20166,"A computer desk with a laptop, desktop monitors and a television.",4033,4835,Object,,assign_B.csv,Object,
+20485,Ornate wedding cake ready at the hotel reception,4097,889,Context,,assign_B.csv,Context,
+21360,Many kites can be seen in the air through umbrellas.,4272,2593,Context,,assign_B.csv,Context,
+21614,a number of people in a room with a person playing nintendo wii,4322,1875,Count,,assign_B.csv,Count,
+22055,A LITTLE ROOM AND DINING ROOM AREA WITH FURNITURE,4411,1195,Ambiguous,underspecified,assign_B.csv,Ambiguous,underspecified
+23065,A bus on the street next to the lamp post.  ,4613,583,Object,,assign_B.csv,Object,
+23305,A man standing on a tennis court holding a tennis racquet.,4661,1577,Object,,assign_B.csv,Object,
+23633,Street vendor selling produce in a street display.,4726,3464,Ambiguous,underspecified,assign_B.csv,Ambiguous,underspecified
+23948,Poplewalk on the sidewalk near the colorfully striped building.,4789,771,Ambiguous,underspecified	,assign_B.csv,Ambiguous,underspecified
+24031,A vase sitting next to a mirror filled with flowers,4806,1121,Object,,assign_B.csv,Object,
+24940,Two people cross country skiing on a snow covered hill.,4988,1675,Object,,assign_B.csv,Object,
+24987,An umpire is in jump action while the pitcher launches the ball.,4997,737,Ambiguous,nearduplicate,assign_B.csv,Ambiguous,nearduplicate
+354,A fireplace and dining table in a dining room.,70,3785,Object,,assign_C.csv,Object,
+968,The man is riding the waves on the water on his board. ,193,1075,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+1470,A sign on the side of a busy street outside a shopping center,294,3940,Attribute,,assign_C.csv,Attribute,
+2759,A statue of two people flying a kite. ,551,4279,Count,,assign_C.csv,Count,
+2795,A snow skier is standing on the snow.,559,2290,Count,,assign_C.csv,Count,
+3023,Two women standing next to each other with one holding video game controllers.,604,3691,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+3171,A large bus on a open city street.,634,4448,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+3253,A crowd of people flying kites in a blue cloudy sky.,650,4279,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+3327,A man who is holding a wine glass.,665,2292,Count,,assign_C.csv,Count,
+3340,A woman in gear skiing down a snowy slope,668,1269,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+3682,Woman taking her picture in a mirror with her cell phone.,736,2838,Object,,assign_C.csv,Object,
+3995,This is a close up photo of a street sign of a cross street.,799,3097,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+5219,a brown cow is standing under a green tree,1043,942,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+5642,THERE ARE PEOPLE THAT ARE ON THE SNOW SLOPE SKIING,1128,2285,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+5893,A baseball game where the batter is waiting for the pitch.,1178,2412,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+6013,A plane pulled up to a gate with the jet bridge out. ,1202,4961,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+6203,A room that has an open refrigerator in it.,1240,4593,Attribute,,assign_C.csv,Attribute,
+7650,Man sitting at a picnic table using a laptop shaded by an umbrella.,1530,439,Object,,assign_C.csv,Object,
+9297,A white plate of food on a table.,1859,2831,Attribute,,assign_C.csv,Attribute,
+9801,We are looking up at an old clock tower.,1960,2662,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+9932,Someone is holding a pick cellular flip phone. ,1986,3853,Attribute,,assign_C.csv,Attribute,
+10215,A white dog laying next to a cat on a bed.,2043,4121,Object,,assign_C.csv,Object,
+10394,Modern bathroom with stone sink area and tiled walls.,2078,246,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+10610,A cat resting on a laptop next to a person.,2122,4853,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+10669,a couple of people that are skiing posing for pictures,2133,807,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+10997,A bird that is standing on a rock in the water.,2199,1362,Action,,assign_C.csv,Action,
+11090,A tray filled with croissants with hotdogs in the middle,2218,664,Object,,assign_C.csv,Object,
+11161,Two large elephants together with a baby elephant close by.,2232,3554,Count,,assign_C.csv,Count,
+11263,A blue semi truck drives down the street.,2252,538,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+11514,"A man in a park, flies his kite with a long tail.",2302,4279,Count,,assign_C.csv,Count,
+12377,a tennis player on a court with a racket,2475,727,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+12981,Pit bull playing with soccer ball in the grass.,2596,1041,Object,,assign_C.csv,Object,
+14304,The mans wrist watch is laying on the table.,2860,2310,Object,,assign_C.csv,Object,
+14513,A woman standing up brushing her teeth with a toothbrush.,2902,4127,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+15418,The young man is surfing in the water,3083,544,Action,,assign_C.csv,Action,
+15791,AN ADULT BEAR IS STANDING IN THE FIELD ,3158,1702,Action,,assign_C.csv,Action,
+16953,a cat sits down in front of a laptop ,3390,2122,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+17429,a man and woman play with a small child ,3485,2209,Object,,assign_C.csv,Object,
+18701,A couple of zebras in a dirt field.,3740,2722,Context,,assign_C.csv,Context,
+19935,Closeup of a decorative gold and grey clock.,3987,2040,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+20633,A black cat sitting inside a bathroom sink,4126,2643,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+21265,A bus driving in a city area with traffic signs.,4253,1832,Attribute,,assign_C.csv,Attribute,
+22280,The pedestrian is walking down the side of the highway by the bus.,4456,3884,Object,,assign_C.csv,Object,
+22291,An elephant playing with a sack handing from a concrete structure.,4458,550,Action,,assign_C.csv,Action,
+22393,white cabinets silver oven sink and  refrigerator ,4478,4393,Object,,assign_C.csv,Object,
+22900,An elaborate church with tiled floors and stained glass.,4580,4347,Ambiguous,nearduplicate,assign_C.csv,Ambiguous,nearduplicate
+22936,A young woman sits near three suitcases of luggage.,4587,1273,Action,,assign_C.csv,Action,
+24218,A man in skis passing an orange flag on a snowy race course.,4843,4373,Count,,assign_C.csv,Count,
+24367,A wheelbarrow sitting in a field next to a surfboard.,4873,2904,Object,,assign_C.csv,Object,
+24877,A large clock tower sitting in the middle of a paved walkway.,4975,3352,Ambiguous,underspecified,assign_C.csv,Ambiguous,underspecified
+325,"Three teddy bears, each a different color, snuggling together.",65,1150,Ambiguous,nearduplicate,assign_overlap.csv,Ambiguous,nearduplicate
+1162,some people in a kitchen preparing food on a counter,232,2467,Context,,assign_overlap.csv,Context,
+1239,A pair of friends sit beneath a massive blue umbrella.,247,3814,Attribute,,assign_overlap.csv,Attribute,
+1412,A white toilet sitting up against a wall.,282,3796,Attribute,,assign_overlap.csv,Attribute,
+1482,A train rides on a bridge past a building.,296,1653,Object,,assign_overlap.csv,Object,
+4061,A tennis player jumps and stretches to return the ball.,812,146,Ambiguous,nearduplicate,assign_overlap.csv,Ambiguous,nearduplicate
+4376,A person lies down along the lines in a parking space.,875,592,Object,,assign_overlap.csv,Object,
+4765,Large clock tower sitting in front of a park. ,953,3352,Ambiguous,nearduplicate,assign_overlap.csv,Ambiguous,nearduplicate
+4781,A white plate containing various pastries on a wooden table.,956,1820,Count,,assign_overlap.csv,Count,
+5186,Engine and train stopped at an indoor platform.,1037,3789,Object,,assign_overlap.csv,Object,
+6552,A view of a modern building with skylight and a fire hydrant.,1310,2949,Context,,assign_overlap.csv,Context,
+7245,A zebra in the grass who is cleaning himself. ,1449,1713,Action,,assign_overlap.csv,Action,
+7416,A small dog trying to grab a frisbee from someone,1483,1041,Object,,assign_overlap.csv,Object,
+9191,Adults enjoying game of badminton on grassy field.,1838,1967,Count,,assign_overlap.csv,Count,
+9971,A kitchen with wooden furniture and a vase filled with red flowers.,1994,1238,Object,,assign_overlap.csv,Object,
+10128,Doorway view into a bathroom with a sink and toilet.,2025,2913,Object,,assign_overlap.csv,Object,
+10226,A lady eating a hot dog with one bite taken from it.,2045,1142,Attribute,,assign_overlap.csv,Attribute,
+10332,A grassy hill side with some animals in the distance ,2066,595,Spatial,,assign_overlap.csv,Spatial,
+10772,A woman carrying a suit case and losing her balance.,2154,1273,Action,,assign_overlap.csv,Action,
+11360,A red brick building with a graffiti covered front.,2272,1098,Object,,assign_overlap.csv,Object,
+12818,a person riding a snow board on a snowy surface,2563,3196,Ambiguous,nearduplicate,assign_overlap.csv,Ambiguous,nearduplicate
+12944,"Two men are sitting near a table, one playing with a video game.",2588,790,Ambiguous,underspecific,assign_overlap.csv,Ambiguous,underspecified
+12955,An orange cat sitting on top of a computer desk.,2591,1936,Ambiguous,underspecific,assign_overlap.csv,Ambiguous,underspecified
+15710,A kitchen has wooden cabinets and black countertops.,3142,2689,Ambiguous,underspecific,assign_overlap.csv,Ambiguous,underspecified
+15882,Two elephants in a field entwining their trunks.,3176,3554,Action,,assign_overlap.csv,Action,
+19766,A bunch of bananas hanging from a tree.,3953,2265,Object,,assign_overlap.csv,Object,
+19872,Batter punts a ball during a baseball game.,3974,3291,Ambiguous,underspecific,assign_overlap.csv,Ambiguous,underspecified
+19915,A man takes a picture of himself eating food.,3983,4655,Action,,assign_overlap.csv,Action,
+21155,A young guy using his computer and talking on his phone.,4231,3227,Object,,assign_overlap.csv,Object,
+23845,A fancy metal cloth is seen against huge barred windows at a stone train station.,4769,506,Attribute,,assign_overlap.csv,Attribute,
+325,"Three teddy bears, each a different color, snuggling together.",65,1150,Ambiguous,missing_info,assign_overlap.xlsx,Ambiguous,missing_info
+1162,some people in a kitchen preparing food on a counter,232,2467,Ambiguous,,assign_overlap.xlsx,Ambiguous,
+1239,A pair of friends sit beneath a massive blue umbrella.,247,3814,Object,,assign_overlap.xlsx,Object,
+1412,A white toilet sitting up against a wall.,282,3796,Attribute,,assign_overlap.xlsx,Attribute,
+1482,A train rides on a bridge past a building.,296,1653,Object,,assign_overlap.xlsx,Object,
+4061,A tennis player jumps and stretches to return the ball.,812,146,Action,,assign_overlap.xlsx,Action,
+4376,A person lies down along the lines in a parking space.,875,592,Object,,assign_overlap.xlsx,Object,
+4765,Large clock tower sitting in front of a park. ,953,3352,Ambiguous,near_duplicate,assign_overlap.xlsx,Ambiguous,nearduplicate
+4781,A white plate containing various pastries on a wooden table.,956,1820,Count,,assign_overlap.xlsx,Count,
+5186,Engine and train stopped at an indoor platform.,1037,3789,Ambiguous,near_duplicate,assign_overlap.xlsx,Ambiguous,nearduplicate
+6552,A view of a modern building with skylight and a fire hydrant.,1310,2949,Attribute,,assign_overlap.xlsx,Attribute,
+7245,A zebra in the grass who is cleaning himself. ,1449,1713,Action,,assign_overlap.xlsx,Action,
+7416,A small dog trying to grab a frisbee from someone,1483,1041,Object,,assign_overlap.xlsx,Object,
+9191,Adults enjoying game of badminton on grassy field.,1838,1967,Object,,assign_overlap.xlsx,Object,
+9971,A kitchen with wooden furniture and a vase filled with red flowers.,1994,1238,Object,,assign_overlap.xlsx,Object,
+10128,Doorway view into a bathroom with a sink and toilet.,2025,2913,Object,,assign_overlap.xlsx,Object,
+10226,A lady eating a hot dog with one bite taken from it.,2045,1142,Action,,assign_overlap.xlsx,Action,
+10332,A grassy hill side with some animals in the distance ,2066,595,Context,,assign_overlap.xlsx,Context,
+10772,A woman carrying a suit case and losing her balance.,2154,1273,Action,,assign_overlap.xlsx,Action,
+11360,A red brick building with a graffiti covered front.,2272,1098,Ambiguous,near_duplicate,assign_overlap.xlsx,Ambiguous,nearduplicate
+12819,Snowboarder going down a slope with trees in the background,2563,1675,Attribute,,assign_overlap.xlsx,Attribute,
+12945,A motorcycle and people looking a travel vehicles.,2589,4846,Object,,assign_overlap.xlsx,Object,
+12957,a keyboard an orange and white cat a desk and a monitor,2591,1936,Ambiguous,near_duplicate,assign_overlap.xlsx,Ambiguous,nearduplicate
+15711,An empty kitchen is photographed as if for a real estate listing.,3142,4093,Ambiguous,near_duplicate,assign_overlap.xlsx,Ambiguous,nearduplicate
+15883,Two elephants wrapping their trunks together in a field.,3176,3554,Ambiguous,near_duplicate,assign_overlap.xlsx,Ambiguous,nearduplicate
+19768,A large bunch of bananas  hangs from a tree.,3953,2265,Object,,assign_overlap.xlsx,Object,
+19873,A baseball player swinging a bat a a baseball.,3974,3171,Object,,assign_overlap.xlsx,Object,
+19917,A man taking a photo with his right hand and eating food with his left hand.,3983,4655,Action,,assign_overlap.xlsx,Action,
+21157,A man is talking on the phone while working on the computer.,4231,3410,Object,,assign_overlap.xlsx,Object,
+23846,a black and white photo of a clock,4769,556,Ambiguous,near_duplicate,assign_overlap.xlsx,Ambiguous,nearduplicate
