@@ -7,7 +7,6 @@ import torch
 from PIL import Image, ImageDraw
 from pycocotools.coco import COCO
 
-# ============== 配置 ==============
 _SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = _SCRIPT_DIR if (_SCRIPT_DIR / "data").exists() else _SCRIPT_DIR.parent
 
@@ -26,11 +25,28 @@ IMG_DIR = os.path.join(DATA_DIR, "val2017")
 OUTPUT_DIR = str(PROJECT_ROOT / "failure_analysis")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# 新增：任务分配配置
 OVERLAP_N = 30
 PER_PERSON_N = 50
 TEAM = ["A", "B", "C"]
-# =================================
+
+
+def enable_determinism(seed: int) -> None:
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+
+
+def stable_rank_indices(sim: torch.Tensor) -> torch.Tensor:
+    """Stable descending ranking with deterministic tie-break by smaller image index."""
+    n_img = sim.shape[1]
+    idx = torch.arange(n_img, device=sim.device, dtype=sim.dtype)
+    adjusted = sim - idx.unsqueeze(0) * 1e-12
+    return torch.argsort(adjusted, dim=1, descending=True)
 
 
 def visualize_failure(caption, gt_path, pred_path, save_path):
@@ -50,31 +66,30 @@ def visualize_failure(caption, gt_path, pred_path, save_path):
 
 
 def write_assignment(path, idx_list, captions, gt_img_index, top1_idx):
-    """生成任务分配CSV文件，包含标注列"""
     with open(path, "w", encoding="utf-8") as f:
-        # 新增category和ambiguous_subtype列
+        
         f.write("idx,caption,gt_img_idx,pred_img_idx,category,ambiguous_subtype\n")
         for i in idx_list:
             cap = captions[i].replace('"', "'")
-            # 修复：tensor转int避免索引问题
             pred_idx = int(top1_idx[i])
             gt_idx = int(gt_img_index[i])
             f.write(f'{i},"{cap}",{gt_idx},{pred_idx},,\n')
 
 
 def save_visuals(tag, idx_list, captions, gt_img_index, top1_idx, image_paths, output_dir):
-    """按任务组保存可视化图片"""
     vis_dir = os.path.join(output_dir, f"vis_{tag}")
     os.makedirs(vis_dir, exist_ok=True)
     
     for i in tqdm(idx_list, desc=f"Saving visuals ({tag})"):
         gt_path = image_paths[int(gt_img_index[i])]
-        pred_path = image_paths[int(top1_idx[i])]  # 修复：tensor转int
+        pred_path = image_paths[int(top1_idx[i])] 
         save_path = os.path.join(vis_dir, f"fail_{i}.jpg")
         visualize_failure(captions[i], gt_path, pred_path, save_path)
 
 
 def main():
+    enable_determinism(42)
+
     print("Loading cache...")
     img_emb = torch.load(CACHE_IMG, map_location="cpu")
     txt_emb = torch.load(CACHE_TXT, map_location="cpu")
@@ -102,7 +117,7 @@ def main():
 
     # Retrieval
     sim = txt_emb @ img_emb.T
-    top1_idx = torch.argmax(sim, dim=1)
+    top1_idx = stable_rank_indices(sim)[:, 0]
 
     failures = []
     for i in range(len(captions)):
@@ -113,27 +128,22 @@ def main():
     print(f"Found {len(failures)} R@1 failures.")
 
     # Sample 200 failures for annotation
-    random.seed(42)
     sampled = random.sample(failures, 200)
 
-    # ========== 新增：任务分配逻辑 ==========
-    # 划分任务集
     overlap = sampled[:OVERLAP_N]
     A_set = sampled[OVERLAP_N:OVERLAP_N + PER_PERSON_N]
     B_set = sampled[OVERLAP_N + PER_PERSON_N:OVERLAP_N + 2*PER_PERSON_N]
     C_set = sampled[OVERLAP_N + 2*PER_PERSON_N:OVERLAP_N + 3*PER_PERSON_N]
     backup = sampled[OVERLAP_N + 3*PER_PERSON_N:]
 
-    # 保存原始总CSV（保留原有逻辑）
     csv_path = os.path.join(OUTPUT_DIR, "failure_samples.csv")
     with open(csv_path, "w", encoding="utf-8") as f:
         f.write("idx,caption,gt_img_idx,pred_img_idx\n")
         for i in sampled:
             cap = captions[i].replace('"', "'")
-            f.write(f'{i},"{cap}",{int(gt_img_index[i])},{int(top1_idx[i])}\n')  # 修复：tensor转int
+            f.write(f'{i},"{cap}",{int(gt_img_index[i])},{int(top1_idx[i])}\n')  
     print(f"Saved original CSV: {csv_path}")
 
-    # 保存任务分配CSV
     write_assignment(os.path.join(OUTPUT_DIR, "assign_overlap.csv"), overlap, captions, gt_img_index, top1_idx)
     write_assignment(os.path.join(OUTPUT_DIR, "assign_A.csv"), A_set, captions, gt_img_index, top1_idx)
     write_assignment(os.path.join(OUTPUT_DIR, "assign_B.csv"), B_set, captions, gt_img_index, top1_idx)
@@ -141,7 +151,6 @@ def main():
     write_assignment(os.path.join(OUTPUT_DIR, "assign_backup.csv"), backup, captions, gt_img_index, top1_idx)
     print("Saved assignment CSV files for team members.")
 
-    # ========== 可视化：按任务组独立保存 ==========
     save_visuals("overlap", overlap, captions, gt_img_index, top1_idx, image_paths, OUTPUT_DIR)
     save_visuals("A", A_set, captions, gt_img_index, top1_idx, image_paths, OUTPUT_DIR)
     save_visuals("B", B_set, captions, gt_img_index, top1_idx, image_paths, OUTPUT_DIR)

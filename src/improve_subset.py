@@ -12,6 +12,25 @@ from transformers import CLIPModel, CLIPProcessor
 _SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = _SCRIPT_DIR if (_SCRIPT_DIR / "data").exists() else _SCRIPT_DIR.parent
 
+
+def enable_determinism(seed: int) -> None:
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+
+
+def stable_rank_indices(sim: torch.Tensor) -> torch.Tensor:
+    """Stable descending ranking with deterministic tie-break by smaller image index."""
+    n_img = sim.shape[1]
+    idx = torch.arange(n_img, device=sim.device, dtype=sim.dtype)
+    adjusted = sim - idx.unsqueeze(0) * 1e-12
+    return torch.argsort(adjusted, dim=1, descending=True)
+
 # ---------------------------
 # Helper: Recall@K on subset
 # ---------------------------
@@ -22,7 +41,7 @@ def recall_at_k_on_subset(sim_matrix, gt_img_index, subset_indices, k: int) -> f
     subset_indices: list[int] indices into text dimension
     """
     sim_sub = sim_matrix[subset_indices]  # [n_sub, N_img]
-    ranks = torch.argsort(sim_sub, dim=1, descending=True)[:, :k]  # [n_sub, k]
+    ranks = stable_rank_indices(sim_sub)[:, :k]  # [n_sub, k]
     gt = torch.tensor([gt_img_index[i] for i in subset_indices], dtype=torch.long)
     hit = (ranks == gt.unsqueeze(1)).any(dim=1).float().mean().item()
     return hit
@@ -198,8 +217,7 @@ def main():
 
     args = parser.parse_args()
 
-    random.seed(args.seed)
-    torch.manual_seed(args.seed)
+    enable_determinism(args.seed)
 
     model_tag = args.model_name.replace("/", "_")
     cache_img = os.path.join(args.cache_dir, f"img_{args.num_images}_{model_tag}.pt")
@@ -319,7 +337,7 @@ def main():
     sim_improved_sub = torch.cat(sim_improved_sub, dim=0)  # [n_sub, N_img]
 
     # Evaluate improved subset recall
-    ranks = torch.argsort(sim_improved_sub, dim=1, descending=True)
+    ranks = stable_rank_indices(sim_improved_sub)
     gt = torch.tensor([gt_img_index[i] for i in subset_indices], dtype=torch.long)
 
     r1_i = (ranks[:, :1] == gt.unsqueeze(1)).any(dim=1).float().mean().item()
@@ -333,7 +351,7 @@ def main():
 
     # --- per-sample hits (for bootstrapping) ---
     baseline_sub = sim_baseline[subset_indices]  # [n_sub, N_img]
-    base_ranks = torch.argsort(baseline_sub, dim=1, descending=True)
+    base_ranks = stable_rank_indices(baseline_sub)
 
     def hit_at_k(ranks_mat, gt_vec, k):
         return (ranks_mat[:, :k] == gt_vec.unsqueeze(1)).any(dim=1).to(torch.int32).cpu().numpy()

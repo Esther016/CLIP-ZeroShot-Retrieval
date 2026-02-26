@@ -5,37 +5,37 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ==========================================
-# 1. 配置与配色 (Configuration)
+# 1. Configuration and color palette
 # ==========================================
 _SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = _SCRIPT_DIR if (_SCRIPT_DIR / "data").exists() else _SCRIPT_DIR.parent
 
-# 输入文件
+# Input files
 SUMMARY_CSV = str(PROJECT_ROOT / "outputs" / "summary" / "summary_subset_results.csv")
 ASSIGN_CSV  = str(PROJECT_ROOT / "failure_analysis" / "analysis_all" / "annotations_clean.csv")
 
 # Bootstrap data files
 HITS_FILES = {
-    "max": str(PROJECT_ROOT / "outputs" / "subset_hits" / "subset_hits_Action_n24_max_seed42.csv"),
-    "mean": str(PROJECT_ROOT / "outputs" / "subset_hits" / "subset_hits_Action_n24_mean_seed42.csv"),
-    "logsumexp": str(PROJECT_ROOT / "outputs" / "subset_hits" / "subset_hits_Action_n24_logsumexp_seed42.csv"),
+    "max": str(PROJECT_ROOT / "outputs" / "subset_hits" / "subset_hits_Action_n25_max_seed42.csv"),
+    "mean": str(PROJECT_ROOT / "outputs" / "subset_hits" / "subset_hits_Action_n25_mean_seed42.csv"),
+    "logsumexp": str(PROJECT_ROOT / "outputs" / "subset_hits" / "subset_hits_Action_n25_logsumexp_seed42.csv"),
 }
 
 OUTDIR = str(PROJECT_ROOT / "outputs" / "figures")
 os.makedirs(OUTDIR, exist_ok=True)
 
-# --- 美化核心：自定义配色方案 (Tableau 风格) ---
-# 这种配色比默认的 RGB 更加沉稳、专业
+# --- Core styling: custom color palette (Tableau-like) ---
+# A more stable and professional palette than default RGB
 COLORS = {
-    "max":       "#4E79A7",  # 深蓝 (Deep Blue)
-    "mean":      "#F28E2B",  # 柔和橙 (Muted Orange)
-    "logsumexp": "#59A14F",  # 森绿 (Forest Green)
+    "max":       "#4E79A7",  # Deep Blue
+    "mean":      "#F28E2B",  # Muted Orange
+    "logsumexp": "#59A14F",  # Forest Green
 }
-COLOR_GRAY = "#595959"       # 字体/边框灰色
+COLOR_GRAY = "#595959"       # Text/border gray
 
-# --- 全局绘图风格设置 ---
+# --- Global plotting style ---
 plt.rcParams['font.family'] = 'serif'
-# plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Liberation Sans'] # 优先使用 Arial
+# plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'Liberation Sans'] # Prefer Arial
 plt.rcParams['font.serif'] = ['Times New Roman', 'Times', 'DejaVu Serif', 'Liberation Serif']
 plt.rcParams['font.size'] = 11
 plt.rcParams['axes.linewidth'] = 1.0
@@ -46,10 +46,10 @@ plt.rcParams['text.color'] = 'black'
 plt.rcParams['figure.dpi'] = 150 
 
 # ==========================================
-# 2. 数据加载与处理
+# 2. Data loading and preprocessing
 # ==========================================
 def generate_dummy_data():
-    """如果没有 CSV，生成模拟数据以供测试"""
+    """Generate dummy data for testing if CSV is missing."""
     print("[INFO] CSV not found. Using dummy data for demonstration.")
     data = {
         "categories": ["Object+Attribute", "Object+Attribute", "Object+Attribute",
@@ -62,45 +62,45 @@ def generate_dummy_data():
     }
     return pd.DataFrame(data)
 
-# 尝试读取 CSV，失败则使用模拟数据
+# Try loading CSV; fall back to dummy data if missing
 if os.path.exists(SUMMARY_CSV):
     df = pd.read_csv(SUMMARY_CSV)
 else:
     df = generate_dummy_data()
 
-# 标准化类别名称，确保顺序一致
+# Standardize category names and ordering
 subset_order = ["Object+Attribute", "Object", "Attribute", "Action"]
 pool_order   = ["max", "mean", "logsumexp"]
 
-# 处理一下 DataFrame 中的类别名，防止 CSV 里写的是 "Object,Attribute" 而这里用 "+"
-# 这是一个常见的数据清洗步骤
+# Normalize category separators: "Object,Attribute" -> "Object+Attribute"
+# This is a common data-cleaning step
 df["categories"] = df["categories"].str.replace(",", "+")
 
 # ==========================================
-# 3. 绘图函数 (核心美化逻辑)
+# 3. Plotting functions (core styling logic)
 # ==========================================
 
 def setup_axis(ax, xlabel, ylabel):
-    """通用的坐标轴美化"""
-    # 隐藏上边和右边的边框 (Spines)
+    """Apply common axis styling."""
+    # Hide top and right spines
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
-    # 添加淡灰色网格，zorder=0 保证网格在柱子后面
+    # Add light gray grid behind bars
     ax.grid(axis='y', linestyle='--', alpha=0.4, color='gray', zorder=0)
     
     ax.set_xlabel(xlabel, fontweight='bold', labelpad=8, color='#333333')
     ax.set_ylabel(ylabel, fontweight='bold', labelpad=8, color='#333333')
 def grouped_bar_beautiful(metric, fname, ylabel):
-    """绘制分组柱状图，带数值标注（仅修改图例位置）"""
-    # 准备数据
+    """Draw grouped bars with value labels (legend location adjusted only)."""
+    # Prepare data
     cats = [c for c in subset_order if c in df["categories"].unique()]
     x = np.arange(len(cats))
-    width = 0.25  # 柱子宽度
+    width = 0.25  # Bar width
     
     fig, ax = plt.subplots(figsize=(8, 5))
     
-    # 循环绘制每一种 pooling
+    # Plot each pooling strategy
     for i, p in enumerate(pool_order):
         vals = []
         for cat in cats:
@@ -110,10 +110,10 @@ def grouped_bar_beautiful(metric, fname, ylabel):
             else:
                 vals.append(float(row.iloc[0][metric]))
         
-        # 计算 x 轴位置
+        # Compute x positions
         x_pos = x + (i - 1) * width
         
-        # 绘制柱子（配色、样式完全不变）
+        # Draw bars (color/style unchanged)
         bars = ax.bar(
             x_pos, vals, width, 
             label=p, 
@@ -123,7 +123,7 @@ def grouped_bar_beautiful(metric, fname, ylabel):
             zorder=3            
         )
         
-        # 数值标签（完全不变）
+        # Value labels (unchanged)
         for bar, val in zip(bars, vals):
             height = bar.get_height()
             y_offset = 0.2 if height < 0.5 else height + 0.2
@@ -136,21 +136,21 @@ def grouped_bar_beautiful(metric, fname, ylabel):
                 fontsize=9, color='#333333', fontweight='bold'
             )
 
-    # 坐标轴设置（完全不变）
+    # Axis settings (unchanged)
     ax.set_xticks(x)
     ax.set_xticklabels(cats, rotation=0)
     setup_axis(ax, "Failure Subset", ylabel)
     
-    # --- 仅修改这部分：动态判断图例位置 ---
-    # 计算左右子集的数值总和
-    left_sum = df[df["categories"].isin(subset_order[:2])][metric].sum()  # 左：Object+Attribute/Object
-    right_sum = df[df["categories"].isin(subset_order[2:])][metric].sum() # 右：Attribute/Action
-    # 左边高→upper right，右边高→upper left
+    # --- Dynamic legend placement ---
+    # Compare total values between left and right subsets
+    left_sum = df[df["categories"].isin(subset_order[:2])][metric].sum()  # Left: Object+Attribute/Object
+    right_sum = df[df["categories"].isin(subset_order[2:])][metric].sum() # Right: Attribute/Action
+    # Higher left -> upper right, higher right -> upper left
     legend_loc = "upper right" if left_sum > right_sum else "upper left"
     
     ax.legend(title="Pooling Strategy", frameon=False, loc=legend_loc)
 
-    # 保存（完全不变）
+    # Save outputs (unchanged)
     plt.tight_layout()
     plt.savefig(os.path.join(OUTDIR, fname + ".png"), dpi=300)
     plt.savefig(os.path.join(OUTDIR, fname + ".pdf"))
@@ -158,25 +158,25 @@ def grouped_bar_beautiful(metric, fname, ylabel):
     print(f"[Output] Saved {fname} (legend at {legend_loc})")
 
 # ==========================================
-# 4. 执行绘图
+# 4. Generate figures
 # ==========================================
 
-# --- 图 1 & 2: 分组柱状图 (R@5 和 R@10) ---
+# --- Fig 1 & 2: Grouped bars (R@5 and R@10) ---
 grouped_bar_beautiful("delta_pp_R@5",  "fig_pooling_ablation_delta_r5_clean",  "Recall@5 Gain (pp)")
 grouped_bar_beautiful("delta_pp_R@10", "fig_pooling_ablation_delta_r10_clean", "Recall@10 Gain (pp)")
 
-# --- 图 3: Best Pooling per Subset ---
-# 筛选最佳策略
+# --- Fig 3: Best Pooling per Subset ---
+# Select best strategy
 best = (
     df.sort_values(by="delta_pp_R@10", ascending=False)
       .drop_duplicates(subset=["categories"], keep="first")
 )
-# 强制排序
+# Enforce fixed order
 best = best.set_index("categories").reindex(subset_order).reset_index()
 
 fig, ax = plt.subplots(figsize=(7, 5))
 x = np.arange(len(best))
-# 根据最佳 pooling 策略来分配颜色
+# Assign colors by best pooling strategy
 bar_colors = [COLORS[p] for p in best["pooling"]]
 
 bars = ax.bar(
@@ -187,18 +187,18 @@ bars = ax.bar(
     zorder=3
 )
 
-# 标注数值
+# Annotate values
 for bar, val, pooling in zip(bars, best["delta_pp_R@10"], best["pooling"]):
     height = bar.get_height()
     y_offset = 0.2 if height < 0.5 else height + 0.2
     
-    # 标数值
+    # Numeric label
     ax.text(
         bar.get_x() + bar.get_width()/2, y_offset, 
         f"+{val:.1f}", 
         ha='center', va='bottom', fontsize=10, fontweight='bold'
     )
-    # 在柱子内部标 pooling 名字 (如果空间够)
+    # Put pooling label inside bar if space allows
     if height > 2:
         ax.text(
             bar.get_x() + bar.get_width()/2, height/2, 
@@ -206,7 +206,7 @@ for bar, val, pooling in zip(bars, best["delta_pp_R@10"], best["pooling"]):
             ha='center', va='center', color='white', fontsize=9, fontweight='bold'
         )
     else:
-        # 空间不够写在上面
+        # If not enough space, put it above the bar
         ax.text(
             bar.get_x() + bar.get_width()/2, y_offset + 1.5, 
             f"({pooling})", 
@@ -223,14 +223,14 @@ plt.savefig(os.path.join(OUTDIR, "fig_best_delta_r10_clean.pdf"))
 plt.close()
 print(f"[Output] Saved fig_best_delta_r10_clean")
 
-# --- 图 4: Bootstrap (如果文件存在) ---
-# 这里我加了一个模拟逻辑，确保你能看到图的样子
+# --- Fig 4: Bootstrap (if files exist) ---
+# Includes a fallback-style flow for easier preview
 def plot_bootstrap_beautiful():
     B = 2000
     rng = np.random.default_rng(42)
     delta_samples = {}
 
-    # 真实读取 + bootstrap ΔR@10
+    # Read actual files + bootstrap ΔR@10
     for pooling, path in HITS_FILES.items():
         if not os.path.exists(path):
             print(f"[WARN] Missing hits file: {path}")
@@ -238,7 +238,7 @@ def plot_bootstrap_beautiful():
 
         hits = pd.read_csv(path)
 
-        # 你的列名是 baseline_hit@10 / improved_hit@10
+        # Expected columns: baseline_hit@10 / improved_hit@10
         base_col = "baseline_hit@10"
         imp_col  = "improved_hit@10"
         if base_col not in hits.columns or imp_col not in hits.columns:
@@ -257,18 +257,18 @@ def plot_bootstrap_beautiful():
         delta_samples[pooling] = deltas
         print(f"[INFO] Bootstrapped {pooling}: n={n}, B={B}")
 
-    # 如果还是空，直接退出（避免 KeyError）
+    # Exit early if still empty (avoid KeyError)
     if len(delta_samples) == 0:
         print("[WARN] No bootstrap samples computed. Check HITS_FILES paths.")
         return
 
-    # 只画存在的 pooling（保持顺序）
+    # Plot only available pooling strategies (keep order)
     keys = [p for p in pool_order if p in delta_samples]
     data_to_plot = [delta_samples[p] for p in keys]
 
     fig, ax = plt.subplots(figsize=(6, 5))
 
-    # 箱线图美化
+    # Boxplot styling
     boxprops = dict(linewidth=1.5, color=COLOR_GRAY)
     medianprops = dict(linewidth=2, color='#D32F2F')
     whiskerprops = dict(linewidth=1.5, color=COLOR_GRAY)
@@ -276,7 +276,7 @@ def plot_bootstrap_beautiful():
 
     bp = ax.boxplot(
         data_to_plot,
-        tick_labels=keys,        # Matplotlib 3.9+ 用 tick_labels
+        tick_labels=keys,        # Matplotlib 3.9+ uses tick_labels
         patch_artist=True,
         showfliers=False,
         boxprops=boxprops,
@@ -295,7 +295,7 @@ def plot_bootstrap_beautiful():
     setup_axis(ax, "Pooling Strategy", "Bootstrap Δ Recall@10 (pp)")
     ax.set_title("Robustness Analysis (Action Subset)", fontsize=12, pad=10)
 
-    # 可选：画一条 0 参考线
+    # Optional: draw zero reference line
     ax.axhline(0, linestyle="--", linewidth=1, color=COLOR_GRAY, alpha=0.6, zorder=1)
 
     plt.tight_layout()
@@ -305,3 +305,156 @@ def plot_bootstrap_beautiful():
     print(f"[Output] Saved fig_bootstrap_action_delta_r10_clean")
 
 plot_bootstrap_beautiful()
+
+# ==========================================
+# 5. Overlap agreement (category kappa + confusion heatmap)
+# ==========================================
+import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import cohen_kappa_score, confusion_matrix
+
+# Replace with your own paths/params (consistent with your script)
+OVERLAP_A_CSV = str(PROJECT_ROOT / "failure_analysis" / "assign_overlap1.csv")  # Annotator A
+OVERLAP_B_CSV = str(PROJECT_ROOT / "failure_analysis" / "assign_overlap2.csv")  # Annotator B
+OUTDIR = str(PROJECT_ROOT / "outputs" / "figures")
+COLOR_GRAY = "#7f7f7f"  # Keep consistent with existing style
+
+def _clean_cat(x):
+    if pd.isna(x):
+        return None
+    x = str(x).strip()
+    if x == "" or x.lower() in ["nan", "none"]:
+        return None
+    return x
+
+def plot_overlap_agreement_and_confusion():
+    if not (os.path.exists(OVERLAP_A_CSV) and os.path.exists(OVERLAP_B_CSV)):
+        print(f"[WARN] Missing overlap csvs: {OVERLAP_A_CSV}, {OVERLAP_B_CSV}")
+        return
+
+    A = pd.read_csv(OVERLAP_A_CSV)
+    B = pd.read_csv(OVERLAP_B_CSV)
+
+    # ---- robust merge key: prefer idx if exists, else fallback to gt_img_index, else row order
+    key = None
+    for cand in ["idx", "gt_img_index", "image_id", "ann_id"]:
+        if cand in A.columns and cand in B.columns:
+            key = cand
+            break
+    if key is None:
+        A = A.reset_index().rename(columns={"index": "_row"})
+        B = B.reset_index().rename(columns={"index": "_row"})
+        key = "_row"
+
+    # ---- category column name
+    cat_col = None
+    for cand in ["category", "Category", "label", "failure_category"]:
+        if cand in A.columns:
+            cat_col = cand
+            break
+    if cat_col is None or cat_col not in B.columns:
+        # If B uses different naming
+        for cand in ["category", "Category", "label", "failure_category"]:
+            if cand in B.columns:
+                cat_col_B = cand
+                break
+        else:
+            print("[WARN] Cannot find category column in overlap files.")
+            return
+    else:
+        cat_col_B = cat_col
+
+    M = A[[key, cat_col]].merge(B[[key, cat_col_B]], on=key, how="inner", suffixes=("_A", "_B"))
+    M["cat_A"] = M[f"{cat_col}_A"].apply(_clean_cat)
+    M["cat_B"] = M[f"{cat_col_B}_B"].apply(_clean_cat)
+
+    # Drop missing
+    M = M.dropna(subset=["cat_A", "cat_B"]).copy()
+    if len(M) == 0:
+        print("[WARN] No valid category pairs after dropping missing.")
+        return
+
+    # Fixed label order (consistent with taxonomy)
+    labels = ["Action", "Ambiguous", "Attribute", "Context", "Count", "Object", "Spatial"]
+    # Keep labels observed or in the predefined list
+    yA = M["cat_A"].tolist()
+    yB = M["cat_B"].tolist()
+
+    # Percent agreement
+    acc = np.mean([a == b for a, b in zip(yA, yB)]) * 100.0
+    kappa = cohen_kappa_score(yA, yB, labels=labels)
+
+    print("==========================================================")
+    print("Category agreement / Cohen's kappa (from script)")
+    print("==========================================================")
+    print(f"N used: {len(M)}")
+    print(f"Percent agreement: {acc:.2f}%")
+    print(f"Cohen's kappa: {kappa:.4f}")
+
+    # Confusion matrix
+    cm = confusion_matrix(yA, yB, labels=labels)
+
+    # ---- Plot confusion heatmap (blue theme + colorbar)
+    fig, ax = plt.subplots(figsize=(7.2, 5.8))
+    im = ax.imshow(cm, interpolation="nearest", cmap="Blues", zorder=2)
+
+    # Colorbar (paper-style)
+    cbar = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.ax.tick_params(colors=COLOR_GRAY)
+    cbar.set_label("Count", color=COLOR_GRAY, fontsize=9)
+
+    ax.set_xticks(np.arange(len(labels)))
+    ax.set_yticks(np.arange(len(labels)))
+    ax.set_xticklabels(labels, rotation=45, ha="right")
+    ax.set_yticklabels(labels)
+
+    # Annotate counts (switch text color by cell intensity)
+    maxv = cm.max() if cm.max() > 0 else 1
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            v = cm[i, j]
+            if v != 0:
+                txt_color = "white" if v > 0.5 * maxv else "#333333"
+                ax.text(j, i, str(v), ha="center", va="center",
+                        fontsize=9, color=txt_color, fontweight="bold")
+
+    setup_axis(ax, "Annotator B", "Annotator A")
+    ax.set_title("Overlap Confusion Matrix (Category)", fontsize=12, pad=10)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTDIR, "fig_overlap_confusion_category_clean.png"), dpi=300)
+    plt.savefig(os.path.join(OUTDIR, "fig_overlap_confusion_category_clean.pdf"))
+    plt.close()
+    print("[Output] Saved fig_overlap_confusion_category_clean")
+
+    # ---- Agreement summary: two panels (correct scales)
+    fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.8))
+
+    # Left: percent agreement (0-100)
+    axes[0].bar([0], [acc], width=0.6, color="#4E79A7", edgecolor="white", zorder=3)
+    axes[0].set_xticks([0])
+    axes[0].set_xticklabels(["Percent agreement"])
+    setup_axis(axes[0], "", "Percent (%)")
+    axes[0].set_ylim(0, 100)
+    axes[0].text(0, acc + 2, f"{acc:.2f}%", ha="center", va="bottom",
+                 fontsize=10, fontweight="bold", color="#333333")
+
+    # Right: kappa (0-1)
+    axes[1].bar([0], [kappa], width=0.6, color="#4E79A7", edgecolor="white", zorder=3)
+    axes[1].set_xticks([0])
+    axes[1].set_xticklabels(["Cohen's kappa"])
+    setup_axis(axes[1], "", "Kappa")
+    axes[1].set_ylim(0, 1.0)
+    axes[1].text(0, kappa + 0.03, f"{kappa:.3f}", ha="center", va="bottom",
+                 fontsize=10, fontweight="bold", color="#333333")
+
+    plt.suptitle("Overlap Agreement Summary", fontsize=12, y=1.02)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTDIR, "fig_overlap_agreement_summary_clean.png"), dpi=300, bbox_inches="tight")
+    plt.savefig(os.path.join(OUTDIR, "fig_overlap_agreement_summary_clean.pdf"), bbox_inches="tight")
+    plt.close()
+    print("[Output] Saved fig_overlap_agreement_summary_clean")
+
+plot_overlap_agreement_and_confusion()

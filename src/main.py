@@ -32,15 +32,35 @@ CACHE_META = os.path.join(CACHE_DIR, f"meta_{NUM_IMAGES}_{MODEL_TAG}.json")
 # =======================================
 
 
+def enable_determinism(seed: int) -> None:
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+
+
+def stable_rank_indices(sim: torch.Tensor) -> torch.Tensor:
+    """
+    Stable descending ranking with deterministic tie-break by smaller image index.
+    """
+    n_img = sim.shape[1]
+    idx = torch.arange(n_img, device=sim.device, dtype=sim.dtype)
+    adjusted = sim - idx.unsqueeze(0) * 1e-12
+    return torch.argsort(adjusted, dim=1, descending=True)
+
+
 def main():
-    random.seed(SEED)
-    torch.manual_seed(SEED)
+    enable_determinism(SEED)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Device:", device)
 
     coco = COCO(ANN_FILE)
-    img_ids_all = coco.getImgIds()
+    img_ids_all = sorted(coco.getImgIds())
     sampled_img_ids = random.sample(img_ids_all, k=NUM_IMAGES)
 
     captions = []
@@ -49,7 +69,7 @@ def main():
 
     print("Building subset...")
     for img_idx, img_id in enumerate(sampled_img_ids):
-        ann_ids = coco.getAnnIds(imgIds=img_id)
+        ann_ids = sorted(coco.getAnnIds(imgIds=img_id))
         anns = coco.loadAnns(ann_ids)
         for a in anns[:CAPTIONS_PER_IMAGE]:
             captions.append(a["caption"])
@@ -116,7 +136,7 @@ def main():
 
     # ========== Evaluate Recall ==========
     sim = txt_emb @ img_emb.T
-    ranks = torch.argsort(sim, dim=1, descending=True)
+    ranks = stable_rank_indices(sim)
 
     def recall_at_k(k):
         correct = 0

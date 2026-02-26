@@ -33,7 +33,7 @@ def merge_assignments(
             "assign_B.csv",
             "assign_C.csv",
             "assign_overlap.csv",
-            "assign_overlap.xlsx",  # optional
+            "assign_overlap.xlsx"
         ]
 
     indir = project_root / input_dir
