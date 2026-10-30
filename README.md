@@ -5,8 +5,8 @@ Instead of stopping at Recall@K, we sample the model's top-1 failures, label *wh
 human-annotated taxonomy, and test whether a training-free fix (prompt ensembling) helps the failure types
 it targets.
 
-> **Context.** Team course project for STATS 302 at Duke Kunshan University.
-> **TODO before publishing:** list teammates and my own role here.
+> **Context.** Team course project for STATS 302 at Duke Kunshan University. I designed and implemented the
+> pipeline and the analysis; teammates contributed to the failure annotation.
 
 ---
 
@@ -59,11 +59,24 @@ I'm listing these explicitly because each one could change the conclusion of fin
 5. **Some captions appear twice.** The 210 annotations cover 190 unique captions, because double-annotated
    items are kept twice. Subset sizes above count rows, not unique captions.
 
-### Planned control experiments
-Embeddings are cached, so all of these are cheap to run:
-- Run ensembling on **all 25k captions** and report the net change, plus the success→failure flip rate.
-- Compare **generic vs. matched-category vs. wrong-category** templates on the same subsets.
-- Deduplicate subsets, then report bootstrap CIs for every row.
+### Control experiments (caveats 1–5)
+`src/control_experiments.py` applies **every** template set (generic, each of the 6 category sets,
+Object+Attribute) with every pooling method to **all 25k captions**. It reuses the cached image embeddings and
+records the ground-truth rank for each caption. `src/analyze_controls.py` then reports, with paired bootstrap CIs:
+
+- **A.** Net ΔR@K on the full set, plus how many captions flip hit→miss vs. miss→hit.
+- **B.** ΔR@K split into R@1 successes, all R@1 failures, and annotated failures. This tests for a selection effect.
+- **C.** Annotated failures × template set, deduplicated. Matched (oracle) templates are compared against
+  generic and wrong-category templates.
+- **D.** A reproduction check against the numbers in the table above.
+
+```bash
+python src/control_experiments.py     # needs outputs/cache from src/main.py; a few minutes on a GPU
+python src/analyze_controls.py        # CPU only; writes outputs/controls/controls_report_mean_R5.md
+python src/analyze_controls.py --pooling max --k 10
+```
+
+Results: *pending*.
 
 ---
 
