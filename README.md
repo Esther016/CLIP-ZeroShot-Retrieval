@@ -1,451 +1,122 @@
-# CLIP-ZeroShot-Retrieval
+# Where Does CLIP Retrieval Fail?
 
+A failure-analysis study of zero-shot **text→image retrieval** with CLIP (ViT-B/32) on MS-COCO 2017 val.
+Instead of stopping at Recall@K, we sample the model's top-1 failures, label *why* each one failed with a
+human-annotated taxonomy, and test whether a training-free fix (prompt ensembling) helps the failure types
+it targets.
 
-This repository provides a **reproducible pipeline (for core metrics and result tables)** for analyzing **failure modes of a pre-trained vision–language model (CLIP)** on image–text retrieval using the MS-COCO dataset.
-
-The project focuses on:
-
-* Zero-shot image–text retrieval
-* Systematic failure taxonomy annotation
-* Analysis of ambiguous vs. semantic failures
-* Failure-driven improvement experiments (prompting / re-ranking)
-
-The pipeline is designed for **beginners** and does **not require model training or fine-tuning**.
+> **Context.** Team course project for STATS 302 at Duke Kunshan University.
+> **TODO before publishing:** list teammates and my own role here.
 
 ---
 
-## Project Overview
+## Main findings
 
-**Model**
+**1. About a third of "failures" are not clearly model errors.**
+Of 210 failure annotations, **31.9% are *Ambiguous***: the caption is underspecified, or the retrieved image
+fits the caption about as well as the ground truth. Raw R@1 therefore *understates* CLIP's real accuracy on
+this benchmark. The most common clear-cut errors are **Object** confusion (29.5%), **Attribute** (11.9%) and
+**Action** (11.4%). Spatial errors almost never appear (1 case).
 
-* CLIP (OpenAI), zero-shot
-* `openai/clip-vit-base-patch32`
+<img src="figs/png/fig_taxonomy_distribution_counts.png" width="560" alt="Distribution of failure categories">
 
-**Dataset**
+**2. The taxonomy is only moderately reliable.**
+On the 20 failures that two annotators labeled independently, raw agreement is **55%** and Cohen's **κ ≈ 0.43**
+(the overlap set was 30 items, but only 20 have a matched pair in `annotations_clean.csv`). The 9 disagreements
+are spread across categories; the most frequent is Object vs. Ambiguous (2 of 9). Treat the category percentages above as
+approximate. Any automatic labeler should be measured against this human–human ceiling, not against 100%.
 
-* MS-COCO 2017 (validation split)
-* Image–caption pairs
+**3. Prompt ensembling gives small gains on the failure subsets, but those gains are preliminary** (see the caveats below).
 
-**Key Idea**
-Rather than only reporting retrieval accuracy, we:
+| Failure subset | n | Baseline R@5 / R@10 | Best ΔR@5 | Best ΔR@10 |
+|---|---:|---|---:|---:|
+| Object + Attribute | 87 | 36.8 / 51.7 | +6.9 pp (mean, logsumexp) | +1.1 pp |
+| Object | 62 | 33.9 / 51.6 | +4.8 pp (logsumexp) | +3.2 pp |
+| Attribute | 25 | 44.0 / 52.0 | +4.0 pp (mean, logsumexp) | 0 |
+| Action | 24 | 33.3 / 45.8 | +4.2 pp (max) | +20.8 pp (all) |
 
-1. Identify Top-1 retrieval failures
-2. Annotate failures with a structured taxonomy
-3. Separate *ambiguous* errors from *clear semantic failures*
-4. Analyze which failure types dominate
-5. Explore targeted improvements on specific failure subsets
+All four rows have baseline R@1 = 0, because they are R@1 failures by construction. Each caption is expanded
+into K = 10–15 templates and the similarities are pooled with max / mean / logsumexp (τ = 1).
 
----
-
-## Repository Structure
-
-### Layout
-
-```text
-.
-├── src/                         # core python scripts
-├── scripts/                     # batch runners
-├── outputs/
-│   ├── cache/                   # embeddings + frozen metadata (generated)
-│   ├── subset_results/          # per-subset experiment json outputs
-│   ├── subset_hits/             # per-sample hit csv outputs
-│   ├── summary/                 # summarized csv outputs
-│   └── figures/                 # generated figures
-├── configs/                     # run configs (e.g., baseline_1k.yaml)
-├── data/                        # COCO images + annotations
-├── docs/                        # guides, definitions, baseline/improvement notes (+ pdf exports)
-├── failure_analysis/            # annotation CSVs, analysis scripts, visualizations 
-├── requirements.txt
-
-```
-
-### Migration Note
-
-This reorganization has been applied with `proposals/` and `trash file/` left unchanged.
+For reference, the full-set baseline (5,000 images, 25,000 captions) is **R@1 30.4 / R@5 54.8 / R@10 66.2**.
 
 ---
 
-## Environment Setup
+## Caveats: what these numbers do *not* show yet
 
-### 1. Python Environment
+I'm listing these explicitly because each one could change the conclusion of finding 3.
 
-Python ≥ 3.9 is recommended.
+1. **Evaluation only on selected failures.** The subsets are R@1 failures, so R@1 can only go up, and
+   near-misses easily cross the R@5 and R@10 cutoffs. The method was never run on the full 25k captions,
+   so any harm to the ~30% of captions CLIP already gets right goes unmeasured.
+2. **Templates are chosen using the human label.** "Category-aware" templates are picked from the
+   *annotated* category. That label doesn't exist at test time, so this is an oracle setting.
+3. **No placebo control.** The run that would separate "category-aware prompting helps" from "any extra
+   templates help" is missing: generic templates, or templates from the *wrong* category.
+4. **Small n and many comparisons.** For example, Action ΔR@10 = +20.8 pp corresponds to 5 of 24 captions.
+   The results span 4 subsets × 3 pooling methods × 3 metrics. Bootstrap CIs (`src/bootstrap_ci.py`) were
+   computed for Action only.
+5. **Some captions appear twice.** The 210 annotations cover 190 unique captions, because double-annotated
+   items are kept twice. Subset sizes above count rows, not unique captions.
 
-```bash
-conda create -n clip_failure python=3.9
-conda activate clip_failure
-```
-
-### 2. Install Dependencies
-
-```bash
-pip install torch torchvision torchaudio
-pip install transformers
-pip install pillow tqdm
-pip install pycocotools
-```
-
-or you can refer to the `requirements.txt`
-```bash
-pip install -r requirements.txt
-```
-
-GPU is optional but recommended.
+### Planned control experiments
+Embeddings are cached, so all of these are cheap to run:
+- Run ensembling on **all 25k captions** and report the net change, plus the success→failure flip rate.
+- Compare **generic vs. matched-category vs. wrong-category** templates on the same subsets.
+- Deduplicate subsets, then report bootstrap CIs for every row.
 
 ---
 
-## Dataset Preparation
+## Method at a glance
 
-### Download MS-COCO 2017 (Validation)
-
-1. Images
-   [https://cocodataset.org/#download](https://cocodataset.org/#download)
-   Download **2017 Val images**
-   
-   which is: [http://images.cocodataset.org/zips/val2017.zip](http://images.cocodataset.org/zips/val2017.zip)
-
-2. Annotations
-   Download **captions_val2017.json**
-   
-   which is: [http://images.cocodataset.org/annotations/annotations_trainval2017.zip](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)
-
-3. Backup:
-   Download from Duke box: [https://duke.box.com/s/c3kdhyenkrjs8eh6ua5ks1276p1qrta1](https://duke.box.com/s/c3kdhyenkrjs8eh6ua5ks1276p1qrta1)
-
-Place files as:
-
-```text
-data/
-├── val2017/
-│   ├── 000000000139.jpg
-│   └── ...
-└── annotations/
-    └── captions_val2017.json
 ```
+COCO val (5k images, 25k captions)
+  └─ CLIP ViT-B/32 embeddings (cached) ──► baseline Recall@K
+       └─ R@1 failures (17,389) ──► random sample of 200 (seed 42)
+            └─ human annotation: 7-way taxonomy + overlap set for agreement
+                 └─ per-category prompt ensembling + pooling ablation ──► ΔRecall@K, bootstrap CI
+```
+
+Taxonomy definitions: [`docs/failure_definition.md`](docs/failure_definition.md).
+Annotation guide: [`docs/annotations_guide_en.md`](docs/annotations_guide_en.md) ([中文](docs/annotations_guide_cn.md)).
 
 ---
-## Quickstart (reproduce main results)
 
-
-
-### A) Fast path (already have `annotations_clean.csv`)
-
-Use this when `failure_analysis/analysis_all/annotations_clean.csv` already exists.
-
-1. Run all improvement experiments + summary + bootstrap CI:
-
-```bat
-scripts\experiment_run.bat
-```
-
-2. Expected outputs:
-
-* `outputs/subset_results/subset_results_*.json`
-* `outputs/subset_hits/subset_hits_*.csv`
-* `outputs/summary/summary_subset_results.csv`
-
-3. Success check:
-
-* Terminal prints `[FINISH] Done`
-* `outputs/summary/summary_subset_results.csv` is generated/updated
-
-### B) Full path (include merge + analysis)
-
-Use this when teammates finished manual labels (`assign_A/B/C/overlap.csv`) and need a full post-annotation pipeline.
-
-1. Run:
-
-```bat
-scripts\post_annotations_run.bat
-```
-
-2. This script will do:
-
-* `src/merge_assignments.py` → merged assignment files
-* `failure_analysis/analyze_annotations.py` → `failure_analysis/analysis_all/annotations_clean.csv`
-* `src/improve_subset.py` (Object+Attribute / Object / Attribute / Action)
-* `src/summarize_result.py` → `outputs/summary/summary_subset_results.csv`
-* `src/bootstrap_ci.py` (if Action hits csv exists)
-
-3. Success check:
-
-* Terminal prints `[FINISH] Done`
-* `failure_analysis/analysis_all/annotations_clean.csv` exists
-* `outputs/summary/summary_subset_results.csv` exists
-
-### C) Optional pre-step (rebuild cache from scratch)
-
-If teammates need to regenerate embeddings/failure samples from raw COCO:
+## Quickstart
 
 ```bash
-python src/main.py
-python src/failure.py
-```
-
-Expected outputs:
-
-* `outputs/cache/img_5000_*.pt`, `txt_5000_*.pt`, `meta_5000_*.json`, `captions_5000_*.json`
-* `failure_analysis/assign_*.csv`, `failure_analysis/vis_*/`
-
-### D) One-page verification checklist
-
-After running A or B, verify:
-
-* `outputs/subset_results/` has JSON files for Action / Attribute / Object / Object-Attribute
-* `outputs/subset_hits/` has Action hit CSVs (`max`, `mean`, `logsumexp`)
-* `outputs/summary/summary_subset_results.csv` contains pooling columns (`max`, `mean`, `logsumexp`)
-* `outputs/figures/` contains report figures (`fig_pooling_*`, `fig_best_*`, optional `fig_bootstrap_*`)
-* Running `python src/summarize_result.py` again finishes without errors
-
-### 0) Setup
-```bash
-conda create -n clip_failure python=3.9
+conda create -n clip_failure python=3.9 -y
 conda activate clip_failure
 pip install -r requirements.txt
 ```
 
-## Step 1: Run Baseline Retrieval
+1. Download COCO 2017 val images and `captions_val2017.json` into `data/`. The exact layout is in [`docs/REPRODUCE.md`](docs/REPRODUCE.md).
+2. Compute and cache embeddings, then report the baseline:
 
-`src/main.py` performs:
+   ```bash
+   python src/main.py
+   ```
 
-* Random sampling of 5,000 images
-* Extraction of image & text embeddings
-* Caching for reproducibility
-* Recall@K evaluation
+3. Re-run one improvement experiment from the committed annotations:
 
-```bash
-python src/main.py
+   ```bash
+   python src/improve_subset.py --annotations_csv failure_analysis/analysis_all/annotations_clean.csv --include_categories Object --do_prompt_ensemble --pooling logsumexp --tau 1.0
+   ```
+
+The full pipeline (failure sampling, annotation merging, all ablations, figures) is documented in
+[`docs/REPRODUCE.md`](docs/REPRODUCE.md). The batch runners in `scripts/` are Windows `.bat` files.
+
+## Repository layout
+
+```
+src/                     pipeline scripts (baseline, failure sampling, improvement, bootstrap, figures)
+failure_analysis/        annotations_clean.csv (the human labels used in all results)
+docs/                    taxonomy definition, annotation guides, baseline + improvement notes, REPRODUCE.md
+report/                  course report draft
+figs/                    report figures (PDF; PNG copies in figs/png/)
+configs/, scripts/       run config and Windows batch runners
 ```
 
-### Output
-
-* Cached embeddings in `outputs/cache/`
-* Metadata with frozen ordering (`meta_*.json`)
-* Console output:
-
-```text
-R@1  = 0.30
-R@5  = 0.55
-R@10 = 0.66
-```
-
-> ⚠️ Do NOT delete cache files unless you intend to recompute embeddings.
-
----
-
-## Step 2: Extract Retrieval Failures
-
-`src/failure.py`:
-
-* Identifies Top-1 failures
-* Samples 200 failures
-* Splits tasks across annotators
-* Saves visualizations (GT vs Retrieved)
-
-```bash
-python src/failure.py
-```
-
-### Output
-
-* CSV task files:
-
-  * `assign_overlap.csv`
-  * `assign_A.csv`
-  * `assign_B.csv`
-  * `assign_C.csv`
-* Visualization folders:
-
-  * `vis_overlap/`
-  * `vis_A/`, `vis_B/`, `vis_C/`
-
-Each image shows:
-
-* Left: Ground Truth
-* Right: Top-1 Retrieved
-* Caption at top
-
----
-
-## Step 3: Manual Annotation (Human-in-the-Loop)
-
-### How to Annotate
-
-See: `docs/annotations_guide_en.md` (or `docs/annotations_guide_cn.md`).
-
-1. Open your assigned CSV (e.g., `assign_A.csv`)
-2. For each row:
-
-   * Open `fail_{idx}.jpg` in your visualization folder
-   * Read the caption
-   * Compare GT vs Retrieved
-3. Fill in:
-
-```text
-category (Ambiguous(underspecified, nearduplicate, the subtypes are optional); Attribute; Action; Count; Context; Sptial; Object.)
-ambiguous_subtype   (only if category = Ambiguous)
-```
-
-### Allowed Categories
-
-See `docs/annotations_guide_en.md` for exact definitions.
-
-For labelling, to make it easier, we use shorter version:
-
-```text
-Ambiguous (underspecified, nearduplicate)
-Attribute
-Action
-Count
-Context
-Spatial
-Object
-```
-
-
-Here is the more detailed version
-```text
-Attribute Binding
-Object Confusion
-Spatial Relation
-Action / Interaction
-Scene / Context
-Counting / Plurality
-Ambiguous
-```
-
-### Annotation Rules (Summary)
-
-* One label per sample
-* If unsure → Ambiguous
-* Do NOT over-interpret small visual differences
-
----
-
-## Step 4: Merge Annotations & Analyze
-
-After annotation:
-
-* Merge CSVs: run `python src/merge_assignments.py`
-  
-* Compute:
-
-  * Category distribution
-  * Ambiguous vs clear failure ratio
-  * Inter-annotator agreement (overlap set)
-
-## Step 5: Summarize results (tables/plots-ready CSV)
-```bash
-python src/summarize_result.py
-```
-Typical findings:
-
-* A large fraction of failures are **Ambiguous**
-* Clear failures cluster around **Attribute** and **Object**
-
----
-
-## Step 6: Failure-Driven Improvements
-
-This repository supports **lightweight improvements without training**:
-
-```bash
-python src/improve_subset.py
-```
-
-### Examples
-
-* Prompt ensembling for attribute-heavy captions
-* Re-ranking using lexical cues (TF-IDF / caption overlap)
-* Category-specific prompting
-
-Evaluation should be:
-
-* **Subset-based** (only on clear failures)
-
-
----
-
-## Reproducibility Notes
-
-* All randomness is seed-controlled
-* Embedding order is frozen via `meta_*.json`
-* Cached embeddings ensure consistent results
-* CSV indices map directly to embedding rows
-* Reproducibility should be judged by `subset_results/*.json`, `subset_hits/*.csv`, and `summary/summary_subset_results.csv`
-* Figure files (`png`/`pdf`) may differ at binary level across environments (e.g., matplotlib/font/backend), while numeric results remain consistent
-
----
-
-## Outputs
-
-After running the pipeline, you should see:
-
-- `outputs/cache/`
-
-   - image/text embeddings + `meta_*.json` (frozen order)
-
-- `failure_analysis/`
-
-   - `assign_overlap.csv`, `assign_A.csv`, ...
-
-   - `vis_overlap/`, `vis_A/`, ...
-
-- `outputs/summary/` (and other outputs folders)
-
-   - `summary_subset_results.csv` (used for report plots)
-
-Note: delete `outputs/cache/` only if you want to recompute embeddings.
-
----
-## Key configs (defaults)
-
-`seed`: controls the sampled subset + any random splits
-
-`subset_size`: number of failure cases per category
-
-`pooling`: {mean, max, logsumexp} for template aggregation
-
-`K_templates`: number of prompt templates
-
-`tau`: temperature for logsumexp (if used)
-
-(Where these are set: src/main.py / src/improve_subset.py)
-
----
-
-## Failure taxonomy labels
-
-Main label (category) must be one of:
-
-- Ambiguous, Attribute, Action, Count, Context, Spatial, Object
-
-If `category=Ambiguous`, optionally fill:
-
-ambiguous_subtype in {underspecified, nearduplicate}
-
----
-
-## Intended Audience
-
-This project is suitable for:
-
-* Undergraduate ML courses
-* First research projects in multimodal learning
-* Students learning how to analyze model failures
-
-No prior experience with large-scale ML training is required.
-
----
-
-## Citation & Acknowledgments
-
-* CLIP: Radford et al., *Learning Transferable Visual Models From Natural Language Supervision*
-* MS-COCO Dataset
-
----
-
-## License
-
-This project is for **educational and research purposes only**.
-
+## References
+- Radford et al., 2021. *Learning Transferable Visual Models From Natural Language Supervision.*
+- Lin et al., 2014. *Microsoft COCO: Common Objects in Context.*
