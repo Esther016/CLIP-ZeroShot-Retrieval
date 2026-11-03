@@ -64,12 +64,12 @@ def gt_rank(sim: torch.Tensor, gt: torch.Tensor) -> torch.Tensor:
 
 
 def pool(block: torch.Tensor, mode: str, tau) -> torch.Tensor:
-    """block: [K, N_img] -> [N_img]"""
+    """block: [..., K, N_img] -> [..., N_img] (pools over the template axis)"""
     if mode == "mean":
-        return block.mean(dim=0)
+        return block.mean(dim=-2)
     if mode == "max":
-        return block.max(dim=0).values
-    return tau * torch.logsumexp(block / tau, dim=0)
+        return block.max(dim=-2).values
+    return tau * torch.logsumexp(block / tau, dim=-2)
 
 
 @torch.no_grad()
@@ -94,7 +94,7 @@ def main():
     ap.add_argument("--cache_tag", type=str, default="",
                     help="Model tag in cache file names (default: derived from --model_name)")
     ap.add_argument("--out_dir", type=str, default=str(PROJECT_ROOT / "outputs" / "controls"))
-    ap.add_argument("--captions_per_chunk", type=int, default=64,
+    ap.add_argument("--captions_per_chunk", type=int, default=256,
                     help="Captions processed together; lower it if you run out of (GPU) memory")
     ap.add_argument("--text_batch_size", type=int, default=256)
     ap.add_argument("--limit", type=int, default=0, help="Only the first N captions (debugging)")
@@ -149,10 +149,20 @@ def main():
 
         sims = encode(model, processor, texts, device, args.text_batch_size) @ img_emb.T  # [T, N_img]
 
+        # Pool all captions of the chunk at once: one GPU op per (set, pooling)
+        # instead of one per caption, which is what makes this fast.
+        gt_chunk = gt_all[start:stop].to(device)
         for s in TEMPLATE_SETS:
+            ids = [plan[j][s] for j in range(stop - start)]
+            same_k = len({len(x) for x in ids}) == 1
+            if same_k:
+                block = sims[torch.tensor(ids, device=device)]  # [B, K, N_img]
             for p, mode, tau in POOLINGS:
-                pooled = torch.stack([pool(sims[plan[j][s]], mode, tau) for j in range(stop - start)])
-                results[f"rank_{s}__{p}"][start:stop] = gt_rank(pooled, gt_all[start:stop].to(device)).cpu().numpy()
+                if same_k:
+                    pooled = pool(block, mode, tau)
+                else:  # rare: a caption whose templates collapse to fewer unique texts
+                    pooled = torch.stack([pool(sims[x], mode, tau) for x in ids])
+                results[f"rank_{s}__{p}"][start:stop] = gt_rank(pooled, gt_chunk).cpu().numpy()
 
     os.makedirs(args.out_dir, exist_ok=True)
     out_csv = os.path.join(args.out_dir, "ranks.csv.gz")
