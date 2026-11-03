@@ -100,7 +100,8 @@ def main():
     ap.add_argument("--out_dir", type=str, default=str(PROJECT_ROOT / "outputs" / "controls"))
     ap.add_argument("--captions_per_chunk", type=int, default=256,
                     help="Captions processed together; lower it if you run out of (GPU) memory")
-    ap.add_argument("--text_batch_size", type=int, default=256)
+    ap.add_argument("--text_batch_size", type=int, default=64,
+                    help="Texts encoded per forward pass; 256 overflowed a 4 GB GPU")
     ap.add_argument("--limit", type=int, default=0, help="Only the first N captions (debugging)")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--profile", action="store_true", help="Print per-stage timings for each chunk")
@@ -117,7 +118,7 @@ def main():
             raise FileNotFoundError(f"Missing cache file: {p} (run src/main.py first)")
 
     img_emb = torch.load(paths["img"], map_location="cpu").float().to(device)
-    txt_emb = torch.load(paths["txt"], map_location="cpu").float().to(device)
+    txt_emb = torch.load(paths["txt"], map_location="cpu").float()  # moved to GPU one chunk at a time
     with open(paths["meta"], encoding="utf-8") as f:
         gt_all = torch.tensor(json.load(f)["gt_img_index"], dtype=torch.long)
     with open(paths["captions"], encoding="utf-8") as f:
@@ -132,7 +133,7 @@ def main():
     tokenizer = CLIPTokenizerFast.from_pretrained(args.model_name)
 
     cols = {"idx": np.arange(n), "gt_img_index": gt_all[:n].numpy()}
-    cols["rank_baseline"] = gt_rank(txt_emb[:n] @ img_emb.T, gt_all[:n].to(device)).cpu().numpy()
+    cols["rank_baseline"] = np.empty(n, dtype=np.int64)
     results = {f"rank_{s}__{p}": np.empty(n, dtype=np.int32) for s in TEMPLATE_SETS for p, _, _ in POOLINGS}
     n_templates = {}
 
@@ -168,6 +169,9 @@ def main():
         # Pool all captions of the chunk at once: one GPU op per (set, pooling)
         # instead of one per caption, which is what makes this fast.
         gt_chunk = gt_all[start:stop].to(device)
+        # Baseline per chunk too: a full [N_txt, N_img] similarity matrix (~1 GB with temporaries)
+        # stays reserved on the GPU and pushes small (e.g. 4 GB) cards into shared system memory.
+        cols["rank_baseline"][start:stop] = gt_rank(txt_emb[start:stop].to(device) @ img_emb.T, gt_chunk).cpu().numpy()
         for s in TEMPLATE_SETS:
             ids = [plan[j][s] for j in range(stop - start)]
             same_k = len({len(x) for x in ids}) == 1
