@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
-from transformers import CLIPModel, CLIPProcessor
+from transformers import CLIPModel, CLIPTokenizerFast
 
 from improve_subset import build_templates, build_templates_by_category, enable_determinism
 
@@ -74,11 +74,11 @@ def pool(block: torch.Tensor, mode: str, tau) -> torch.Tensor:
 
 
 @torch.no_grad()
-def encode(model, processor, texts, device, batch_size, timer=None):
+def encode(model, tokenizer, texts, device, batch_size, timer=None):
     out = []
     for i in range(0, len(texts), batch_size):
         t0 = time.perf_counter()
-        inputs = processor(text=texts[i:i + batch_size], return_tensors="pt",
+        inputs = tokenizer(texts[i:i + batch_size], return_tensors="pt",
                            padding=True, truncation=True, max_length=77).to(device)
         if timer is not None:
             timer["tokenize"] += time.perf_counter() - t0
@@ -127,7 +127,9 @@ def main():
     print(f"Device: {device} | captions: {n} | images: {img_emb.shape[0]}")
 
     model = CLIPModel.from_pretrained(args.model_name).to(device).eval()
-    processor = CLIPProcessor.from_pretrained(args.model_name)
+    # Load the Rust ("fast") tokenizer explicitly: on some setups CLIPProcessor falls back to the
+    # pure-Python tokenizer, which made tokenization ~100x slower than encoding.
+    tokenizer = CLIPTokenizerFast.from_pretrained(args.model_name)
 
     cols = {"idx": np.arange(n), "gt_img_index": gt_all[:n].numpy()}
     cols["rank_baseline"] = gt_rank(txt_emb[:n] @ img_emb.T, gt_all[:n].to(device)).cpu().numpy()
@@ -160,7 +162,7 @@ def main():
             plan.append(per_set)
 
         t_plan = tick()
-        sims = encode(model, processor, texts, device, args.text_batch_size, timer) @ img_emb.T  # [T, N_img]
+        sims = encode(model, tokenizer, texts, device, args.text_batch_size, timer) @ img_emb.T  # [T, N_img]
         t_encode = tick()
 
         # Pool all captions of the chunk at once: one GPU op per (set, pooling)
