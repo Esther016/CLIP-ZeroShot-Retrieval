@@ -23,6 +23,7 @@ Then run src/analyze_controls.py (CPU only, no model needed).
 """
 import os
 import json
+import time
 import argparse
 from pathlib import Path
 
@@ -73,11 +74,14 @@ def pool(block: torch.Tensor, mode: str, tau) -> torch.Tensor:
 
 
 @torch.no_grad()
-def encode(model, processor, texts, device, batch_size):
+def encode(model, processor, texts, device, batch_size, timer=None):
     out = []
     for i in range(0, len(texts), batch_size):
+        t0 = time.perf_counter()
         inputs = processor(text=texts[i:i + batch_size], return_tensors="pt",
                            padding=True, truncation=True, max_length=77).to(device)
+        if timer is not None:
+            timer["tokenize"] += time.perf_counter() - t0
         emb = model.get_text_features(**inputs)
         if not torch.is_tensor(emb):  # transformers>=5 returns an output object
             emb = emb.pooler_output
@@ -99,6 +103,7 @@ def main():
     ap.add_argument("--text_batch_size", type=int, default=256)
     ap.add_argument("--limit", type=int, default=0, help="Only the first N captions (debugging)")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--profile", action="store_true", help="Print per-stage timings for each chunk")
     args = ap.parse_args()
 
     enable_determinism(args.seed)
@@ -129,8 +134,15 @@ def main():
     results = {f"rank_{s}__{p}": np.empty(n, dtype=np.int32) for s in TEMPLATE_SETS for p, _, _ in POOLINGS}
     n_templates = {}
 
+    def tick():
+        if device == "cuda":
+            torch.cuda.synchronize()
+        return time.perf_counter()
+
     for start in tqdm(range(0, n, args.captions_per_chunk), desc="Caption chunks"):
         stop = min(start + args.captions_per_chunk, n)
+        timer = {"tokenize": 0.0} if args.profile else None
+        t_start = tick()
 
         # Unique texts for this chunk + per (caption, set) index lists into them.
         texts, text_pos, plan = [], {}, []
@@ -147,7 +159,9 @@ def main():
                 n_templates.setdefault(s, len(ids))
             plan.append(per_set)
 
-        sims = encode(model, processor, texts, device, args.text_batch_size) @ img_emb.T  # [T, N_img]
+        t_plan = tick()
+        sims = encode(model, processor, texts, device, args.text_batch_size, timer) @ img_emb.T  # [T, N_img]
+        t_encode = tick()
 
         # Pool all captions of the chunk at once: one GPU op per (set, pooling)
         # instead of one per caption, which is what makes this fast.
@@ -163,6 +177,12 @@ def main():
                 else:  # rare: a caption whose templates collapse to fewer unique texts
                     pooled = torch.stack([pool(sims[x], mode, tau) for x in ids])
                 results[f"rank_{s}__{p}"][start:stop] = gt_rank(pooled, gt_chunk).cpu().numpy()
+
+        if args.profile:
+            t_end = tick()
+            tqdm.write(f"[profile] texts={len(texts)} | build templates {t_plan - t_start:.1f}s | "
+                       f"tokenize {timer['tokenize']:.1f}s | encode+matmul (excl. tokenize) "
+                       f"{t_encode - t_plan - timer['tokenize']:.1f}s | pool+rank {t_end - t_encode:.1f}s")
 
     os.makedirs(args.out_dir, exist_ok=True)
     out_csv = os.path.join(args.out_dir, "ranks.csv.gz")
