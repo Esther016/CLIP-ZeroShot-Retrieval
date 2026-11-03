@@ -184,11 +184,19 @@ def main():
                     pooled = torch.stack([pool(sims[x], mode, tau) for x in ids])
                 results[f"rank_{s}__{p}"][start:stop] = gt_rank(pooled, gt_chunk).cpu().numpy()
 
+        # Return this chunk's GPU memory to the driver. Otherwise the caching allocator keeps
+        # slightly different-sized blocks from every chunk, reserved memory creeps up, and a
+        # small GPU starts spilling into shared system memory after a few chunks.
+        sims = block = pooled = None
+        if device == "cuda":
+            torch.cuda.empty_cache()
+
         if args.profile:
             t_end = tick()
+            mem = f" | GPU reserved {torch.cuda.memory_reserved() / 2**30:.2f} GiB" if device == "cuda" else ""
             tqdm.write(f"[profile] texts={len(texts)} | build templates {t_plan - t_start:.1f}s | "
                        f"tokenize {timer['tokenize']:.1f}s | encode+matmul (excl. tokenize) "
-                       f"{t_encode - t_plan - timer['tokenize']:.1f}s | pool+rank {t_end - t_encode:.1f}s")
+                       f"{t_encode - t_plan - timer['tokenize']:.1f}s | pool+rank {t_end - t_encode:.1f}s{mem}")
 
     os.makedirs(args.out_dir, exist_ok=True)
     out_csv = os.path.join(args.out_dir, "ranks.csv.gz")
